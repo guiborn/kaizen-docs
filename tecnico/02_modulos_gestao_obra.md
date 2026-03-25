@@ -7,16 +7,14 @@ order: 2
 toc: true
 ---
 
-# Kaizen — Módulos de Gestão de Obra
-
-O Kaizen organiza a gestão de obras em **8 blocos principais**, cobrindo o ciclo completo da construção: planejamento, controle operacional, qualidade, custo e entrega. Módulos complementares ampliam a cobertura para demandas específicas.
+# Kaizen — Módulos de Gestão O Kaizen organiza a gestão de obras em **8 blocos principais**, cobrindo o ciclo completo da construção: planejamento, controle operacional, qualidade, custo e entrega. Módulos complementares ampliam a cobertura para demandas específicas.
 
 ## Navegação Rápida
 
 | # | Bloco | Funções Principais |
 |---|-------|--------------------|
 | [1](#1-produtividade--planejamento-e-medições-kaizen) | **Produtividade — Planejamento e Medições Kaizen** | Planos de produção, registro diário de avanço, índice de produtividade |
-| [2](#2-planejamento-físico-financeiro) | **Planejamento Físico-Financeiro** | Curva S, CFF, Gantt reprogramável, cronogramas, vinculação de orçamento |
+| [2](#2-planejamento-físico-financeiro) | **Planejamento Físico-Financeiro** | Macaquinho (visão matricial), Curva S, CFF, Gantt reprogramável, cronogramas, vinculação de orçamento |
 | [3](#3-controle-de-produção) | **Controle de Produção** | Medições físicas, painel de produção, equipes & histograma, planos de ação |
 | [4](#4-rotinas-de-gestão) | **Rotinas de Gestão** | Farol de contratações, quadro de restrições (6M/6WLA — Last Planner) |
 | [5](#5-qualidade) | **Qualidade** | FVS, inspeção de obra, estabilização lean |
@@ -70,54 +68,266 @@ O sistema calcula automaticamente o **Índice de Produtividade** (produção ÷ 
 
 Ferramentas de planejamento integradas ao cronograma da obra, conectadas diretamente à plataforma **[Prevision](05_integracoes.md#2-prevision-planejamento-de-obras)** via API GraphQL. Permitem visualizar, analisar e reprogramar o cronograma com múltiplas perspectivas de progresso físico e financeiro.
 
-> Requer cronograma ativo na obra. Itens 2.1–2.6 exigem privilégio **`baseline_view`**; item 2.7 exige **`physical`**.
+> Requer cronograma ativo na obra. Itens 2.1–2.7 exigem privilégio **`baseline_view`**; item 2.8 exige **`physical`**.
 
 ---
 
 ### 2.1 Atividades
 
-Tabela completa de todas as atividades do cronograma ativo. Colunas: serviço, lote, início, fim, duração, custo, status, % concluído. Operações disponíveis:
+Tabela completa de todas as atividades do cronograma ativo, implementada como `ActivityTableScreen` + `ActivityDataSource` (SfDataGrid/Syncfusion). Permite visualizar e editar o cronograma em formato de planilha.
 
-- Edição inline de datas e custos diretamente na tabela
-- Busca de atividade por nome com debounce
-- Filtros: somente baseline, somente críticas, exibir/ocultar concluídas
-- **Cálculo do caminho crítico** sob demanda (destaca as atividades que definem o prazo mínimo do projeto)
-- Fila de desfazer/refazer (até 15 passos)
-- **Exportação** em Excel (.xlsx) e PDF
+**Colunas configuráveis** (seletor de colunas na AppBar):
 
----
+| Coluna | Descrição |
+|--------|----------|
+| Serviço | Nome do serviço / pacote de trabalho |
+| Lote | Lote ou pavimento/setor da obra |
+| Início / Término | Datas planejadas (editáveis inline) |
+| Duração | Calculada em dias úteis |
+| Custo | Custo orçado; editável por admins (validado inline) |
+| Peso | Participação percentual no custo total |
+| % Base | Progresso segundo a baseline de referência na data ativa |
+| % Previsto | Progresso previsto pelo cronograma atual |
+| % Realizado | Progresso real registrado em medições |
+| Crítica | Indicador de pertencimento ao caminho crítico |
+| Fornecedor | Empresa contratada, carregada sob demanda da integração Prevision |
 
-### 2.2 Gantt Reprogramável
+**Operações disponíveis:**
 
-Visualização Gantt interativa do cronograma ativo. Barras coloridas por serviço sobre eixo de tempo scrollável.
+- Edição inline de datas e custos com validação de acesso (somente admins editam custo)
+- Busca de atividade por nome com debounce de 500 ms
+- Filtros rápidos: ocultar concluídas, somente mês corrente, somente semana corrente, somente baseline > realizado, somente previsto > realizado
+- **Cálculo do caminho crítico** sob demanda (destaca em coluna "Crítica" as atividades que definem o prazo mínimo do projeto)
+- Pilha de **desfazer** (até 15 passos via `undoStack`) — restaura snapshot completo de todas as atividades
+- **Salvamento em nuvem** (botão laranja quando há alterações pendentes): atualiza custos, datas, serviços, lotes, feriados e atividades no Firestore
+- **Salvar Como**: cria cópia do cronograma com novo nome
+- Exportação em Excel (.xlsx) e PDF via biblioteca `printing`
 
-| Funcionalidade | Detalhe |
-|---------------|---------|
-| **Reprogramação dinâmica** | Drag das barras para reprogramar; duração recalculada automaticamente |
-| **Dependências** | Linhas de dependência entre atividades |
-| **Caminho crítico** | Destacado em vermelho; recalculado ao mover barras |
-| **Filtros** | Por serviço (dropdown na AppBar); toggle de atividades concluídas |
-| **Renderização** | `CustomPainter` (`GanttGridPainter`, `GanttActivityPainter`) |
+**Cabeçalhos agrupados (Stacked Headers):** colunas ativas são agrupadas em faixas visuais por categoria (Identificação / Custo / Baseline / Previsto / Realizado / Qualidade).
 
----
-
-### 2.3 Curva S — Análise do Planejamento
-
-Curva S acumulada com **três séries simultâneas**, comparando cronograma previsto, baseline e realizado:
-
-| Série | Significado |
-|-------|------------|
-| **S** (Scheduled) | Cronograma previsto ativo |
-| **B** (Baseline) | Cronograma de referência imutável |
-| **D** (Done) | Realizado acumulado |
-
-Os valores são calculados por atividade e acumulados por dia, com detalhe mensal por serviço. O resultado é cacheado no documento do cronograma (`cffCalculatedAt`, `cffVersion`) para evitar reprocessamento.
-
-**Perspectivas disponíveis:** monetária (R$) e física (% de progresso). Suporte a exportação e zoom por período.
+**Chave de privilégio:** `baseline_view`
 
 ---
 
-### 2.4 Cronograma Físico-Financeiro (CFF)
+### 2.2 Macaquinho — Visão Matricial
+
+O **Macaquinho** é a visão matricial do cronograma da obra: um grid colorido onde cada célula representa a interseção de um **lote (linha)** com um **serviço (coluna)**. Cada célula exibe um tile de atividade com indicadores visuais de progresso, permitindo identificar de imediato onde a obra está adiantada, em dia ou atrasada.
+
+> Acionado pela rota que passa `mode: 'monkey'` ao `BaselineController`. Ao entrar no modo macaquinho, o controller ordena atividades por data de início decrescente e carrega automaticamente o mapa de inspeções.
+
+#### Tiles de atividade (`MonkeyTile`)
+
+Cada célula do grid renderiza um `MonkeyTile` com as seguintes informações:
+
+```
+┌──────────────────────────────────┐
+│  Serviço — Lote                  │  ← nome (truncado)
+│                                  │
+│  Base:    ##.#%  (laranja)       │
+│  Previsto: ##.#% (preto)         │
+│  Realizado: ##.#% (azul)        │
+│                                  │
+│  [barra de progresso colorida]   │
+│  Início → Término                │
+└──────────────────────────────────┘
+```
+
+**Cor de fundo do tile:**
+
+| Cor | Condição |
+|-----|---------|
+| Verde | `realizado ≥ 95 %` do previsto |
+| Azul claro | `85 % ≤ realizado < 95 %` do previsto |
+| Amarelo | `70 % ≤ realizado < 85 %` do previsto |
+| Vermelho | `realizado < 70 %` do previsto OU atividade atrasada |
+| Roxo/outline | Atividade pertencente ao caminho crítico (`isCritical`) |
+| Cinza | Atividade sem dados de progresso |
+
+#### Modos de Heatmap
+
+O tile pode ser sobreposto por um heatmap configurável, útil em análises de concentração de trabalho:
+
+| Modo | Critério de cor |
+|------|---------------|
+| **Mensal** | Hue ISO-mês com stride-7 (cada mês tem cor bem distinta) |
+| **Semanal** | Hue gradiente 0°→300° distribuído pelas 52 semanas do ano |
+| **Proximidade** | Quente (vermelho) = próxima da `activeDate`; fria (azul) = distante |
+
+#### Controles e filtros
+
+| Controle | Descrição |
+|----------|-----------|
+| **Seletor de data** (`activeDate`) | Recalcula `expected` de todas as atividades; as cores dos tiles são atualizadas sem recarregar do servidor |
+| **Zoom de célula** (`monkeyCellSize`) | Slider de 20 px a 240 px; escala fontes e barras proporcionalmente |
+| **Filtro por lote** | Seleção multi-select com agrupamento por tags favoritas; ao entrar, pré-seleciona o primeiro grupo favorito |
+| **Filtro por serviço** | Busca textual debounced; exibe indicador de quantos serviços selecionados |
+| **Ocultar finalizados** | Remove serviços onde todos os lotes estão a 100 % |
+| **Somente caminho crítico** | Restringe grid às atividades com `isCritical = true` |
+| **Tags de serviço, fornecedor, status de inspeção** | Filtros adicionais |
+
+#### Ações disponíveis por célula (menu de contexto)
+
+Ao pressionar/clicar com botão direito sobre um tile, o usuário pode:
+
+- **Abrir/criar Restrição** — abre `restrictionDialog` (integrado ao `MidTermController`), vinculando a restrição ao ID da atividade
+- **Listar Restrições vinculadas** — bottom sheet com todas as restrições ligadas àquela atividade
+- **Abrir/criar Plano de Ação** — abre `showActionPlanDialog` (integrado ao `ActionPlanController`)
+- **Listar Planos de Ação vinculados** — bottom sheet com planos
+- **Status de Inspeção** (`_showInspectionStatusMenuAtPosition`) — altera o status da inspeção da atividade (integrado ao módulo FVS)
+
+#### KPIs e estatísticas
+
+Acima do grid e em painel colapsável (mobile), são exibidos:
+
+- **KPI global:** % realizado × previsto × baseline ponderados por custo
+- **KPI por serviço:** tile de estatísticas ao lado do cabeçalho de cada serviço, mostrando médias de B/P/R para aquele serviço em todos os lotes visíveis
+- **Painel de stats mobile:** ícone na AppBar expande bottom sheet com KPIs detalhados
+
+#### Exportação
+
+| Formato | Função | Conteúdo |
+|---------|--------|----------|
+| **PDF** | `printMonkey()` | Grid completo renderizado campo a campo com cores replicando os tiles |
+| **Excel** | `exportMonkeyToExcel()` | Matriz lote×serviço com valores B/P/R e fundo colorido por status |
+
+**Chave de privilégio:** `baseline_view`
+
+---
+
+### 2.3 Gantt Reprogramável
+
+Visualização Gantt interativa do cronograma ativo, implementada como `BaselineGantt` + `GanttChart` (`CustomPainter`). As barras do Gantt são renderizadas diretamente em canvas para máxima performance, sobrepondo vários cronogramas.
+
+#### Renderização e navegação
+
+- `GanttGridPainter` desenha a grade de datas e os rótulos do eixo X; `GanttActivityPainter` pinta as barras de cada atividade e as linhas de dependência
+- Eixo X scrollável horizontalmente; eixo Y: atividades filtradas
+- **Scroll para hoje:** botão na AppBar centraliza a vista na data corrente
+- **Scroll para término previsto:** toque duplo no campo "Término previsto" na AppBar rola até a última barra
+- **Data de término previsto** exibida na AppBar em tempo real; atualizada quando barras são arrastadas
+
+#### Reprogramação por drag & drop
+
+```
+[usuário arrasta barra da atividade A]
+  → tempDragStartAt / tempDragEndAt atualizados em tempo real no canvas
+  → dragOffsetX armazena deslocamento em pixels
+  → ao soltar: duração original mantida; datas deslocadas
+  → saveUndoSnapshot() salva estado anterior na pilha de desfazer
+  → applyFilters() + refreshChart() atualizam a view
+```
+
+- Duração é preservada no arrasto (move sem esticar)
+- Dependências entre atividades são verificadas: o sistema alerta se a nova data viola uma relação TI/II/TT/IT com atraso configurável
+- O cálculo usa `addWorkingDays()` e `nextWorkingDay()` respeitando feriados da obra e dias úteis configurados
+
+#### Pilha de desfazer / salvar
+
+| Controle | Detalhe |
+|----------|---------|
+| **Desfazer** (ícone laranja) | Restaura snapshot completo de todas as atividades; aparece somente quando há alterações pendentes |
+| **Salvar em nuvem** (ícone laranja) | `saveScheduleToFirebase()` — persiste custos, datas, serviços, lotes, feriados e a lista de atividades no Firestore |
+| **Salvar Como** | Cria cópia do cronograma com novo nome via `saveScheduleAs()` |
+| **Travar edições** | Ícone de cadeado (roxo = travado); bloqueia qualquer drag de barra |
+| Histórico (15 passos) | `maxUndoSteps = 15`; o snapshot mais antigo é descartado automaticamente ao exceder |
+
+#### Caminho crítico
+
+- **Cronogramas do Prevision:** o campo `isCritical` já vem calculado pela API — barras críticas exibidas em vermelho sem recalcular localmente
+- **Cronogramas locais:** botão de triângulo de aviso dispara `calculateCriticalPath()` (algoritmo de CPM); barras críticas destacadas em vermelho após o cálculo
+- Toggle na AppBar mostra/oculta o overlay de caminho crítico
+
+#### Filtros disponíveis
+
+| Filtro | Detalhe |
+|--------|---------|
+| **Por serviço** | Multi-select com paginação (`activeServiceIndex`): navega um serviço por vez com setas ← → |
+| **Por lote** | Seletor com agrupamento por tags; suporte a Tags Favoritas para acesso rápido |
+| **Por intervalo de datas** | `DateRangePicker`; restringe o canvas ao período selecionado |
+| **Ocultar concluídas** | Remove atividades a 100 % |
+| **Somente caminho crítico** | Filtra apenas atividades com `isCritical = true` |
+| **Tags favoritas de lotes** | Dropdown na AppBar com grupos pré-salvos; muda lotes + serviços em um clique |
+
+#### Seletor de colunas
+
+`ColumnSelectorDialog` permite escolher quais colunas da **tabela de atividades** (§ 2.1) são exibidas. Compartilha o estado `visibleColumns` com a view de atividades.
+
+**Chave de privilégio:** `baseline_view`
+
+---
+
+### 2.4 Curva S — Análise do Planejamento
+
+Módulo de análise do planejamento (`ScurveView` + `ScurveController`), organizado em **quatro abas** acessíveis pela barra de ícones:
+
+| # | Aba | Widget | Descrição |
+|---|-----|--------|-----------|
+| 0 | Curva S Acumulada | `SCurveChart` | Linhas acumuladas B/P/R ao longo do tempo |
+| 1 | Gráfico Mensal | `MonthlyDeltaChart` | Barras do incremento mensal com drill-down por serviço |
+| 2 | Análise de Serviços | `ServiceMonthlyGrid` | Grade de % por serviço e mês |
+| 3 | CFF | `CFFGrid` | Cronograma Físico-Financeiro (ver § 2.5) |
+
+#### Inicialização e cálculo da curva
+
+Ao entrar na tela, o `ScurveController.onInit()` verifica se o baseline já está carregado. Se não estiver, chama:
+
+```
+previsionController.activateBaselineSchedule(siteId)
+  → schedule.calculateSCurve(baselineSchedule)
+  → previsionController.applySCurveScheduledFlagAdjustment(schedule)
+```
+
+O resultado é armazenado em `schedule.daySCurve` — um `Map<DateTime, Map<String,dynamic>>` com entradas diárias contendo `{'s': ..., 'b': ..., 'd': ...}` (0.0 a 1.0, onde 1.0 = 100%).
+
+#### Aba 0 — Curva S Acumulada (`SCurveChart`)
+
+Gráfico de linhas com três séries simultâneas plotadas por `SfCartesianChart`:
+
+| Série | React. | Cor |
+|-------|-------|-----|
+| **Base** | Baseline imutável de referência | Laranja escuro |
+| **Previsto** | Cronograma atual reprogramável | Preto |
+| **Realizado** | Progresso real acumulado (pode ter lacunas — série `nullable`) | Azul |
+
+- Eixo X: `DateTimeAxis` cobrindo todo o ciclo da obra
+- Eixo Y: `NumericAxis` 0–100 % com rótulo `{value}%`
+- **Trackball** em modo `groupAllPoints`: toque em qualquer ponto exibe tooltip com os três valores simultâneos
+- **Zoom/pan** horizontal (`ZoomMode.x`); botão de reset de zoom na barra roxa acima do gráfico
+- **Exportar CSV**: ícone de download na barra roxa exporta `schedule.exportSCurveAsCSV()`
+
+#### Aba 1 — Gráfico Mensal de Deltas (`MonthlyDeltaChart`)
+
+Gráfico de barras agrupadas mostrando o incremento de % realizado por mês:
+
+- Três barras por mês: Base / Previsto / Realizado
+- **Drill-down**: ao tocar em uma barra, exibe gráfico de colunas com a contribuição de cada **serviço** para aquele mês (Series B/P/R por serviço, ordenado por previsto decrescente)
+- O drill-down leva em conta `daySCurveActivities` (mapa por atividade), aplicando os pesos de custo (`budgetCost / totalBudget`) para converter percentuais unitários em contribuição ponderada
+- `areLabelsVisible` toggle: exibe/oculta rótulos sobre as barras
+- Zoom/pan horizontal compartilhado
+
+#### Aba 2 — Análise de Serviços (`ServiceMonthlyGrid`)
+
+Grade tabular mostrando o progresso mensal por serviço. Permite identificar quais serviços estão concentrados em quais períodos e detectar desvios por pacote de trabalho. Recalculada automaticamente quando `isTableRecalcualting` é `false`.
+
+#### Aba 3 — CFF
+
+Ver § 2.5.
+
+#### Cache do CFF no Firestore
+
+```
+Path: {client}/default_sites/{siteId}/budgets/{budgetId}/cff/
+```
+
+- `calculateAndSaveCff()` executa `calculateCFFAsync()` em async, persiste em chunks de 150 itens (`_cffChunkSize`) no Firestore, e atualiza `cffVersion` para forçar rebuild do `CFFGrid`
+- `cffRefDate`: data de corte usada no cálculo; exibida no tooltip do botão Recalcular CFF
+- Na inicialização, `_loadCffCache()` restaura o cache salvo; se disponível, `cffVersion > 0` e a aba CFF exibe imediatamente sem recalcular
+
+**Chave de privilégio:** `baseline_view`
+
+---
+
+### 2.5 Cronograma Físico-Financeiro (CFF)
 
 O CFF é um relatório tabular que cruza **itens de orçamento (WBS)** com **períodos de execução**, mostrando a distribuição temporal dos custos planejados, esperados e realizados.
 
@@ -136,7 +346,7 @@ Cada linha contém o item de orçamento (código, descrição, custo de material
 
 ---
 
-### 2.5 Vinculação de Orçamento — Budget Weights
+### 2.6 Vinculação de Orçamento — Budget Weights
 
 Liga cada item do orçamento WBS a uma ou mais atividades do cronograma com percentuais de peso. Permite calcular qual percentual do custo de um item deve ser alocado a cada atividade vinculada, tornando possível projetar o progresso físico-financeiro esperado vs. realizado por rubrica.
 
@@ -153,7 +363,7 @@ Item WBS "01.03 Alvenaria"  (R$ 300 k)
 
 ---
 
-### 2.6 Relatórios Operacionais
+### 2.7 Relatórios Operacionais
 
 Exportações e relatórios gerados a partir do cronograma ativo:
 
@@ -166,7 +376,7 @@ Exportações e relatórios gerados a partir do cronograma ativo:
 
 ---
 
-### 2.7 Gestão de Cronogramas
+### 2.8 Gestão de Cronogramas
 
 Gerenciamento do ciclo de vida dos cronogramas da obra: criação de novas versões, definição do baseline de referência, comparação entre versões e histórico completo de revisões com autor e timestamp.
 
@@ -194,26 +404,147 @@ Ferramentas de acompanhamento e controle da execução física da obra, com foco
 
 ### 3.1 Medições Físicas
 
-Registro de medições físicas contratuais (volumes, áreas, quantidades por serviço). Vinculadas a **contratos** e **boletins de medição** com fluxo de aprovação configurável. Gera boletim de medição em PDF.
+O módulo de **Medições Físicas** é o núcleo do controle de produtividade da obra. Cada **medição** é um snapshot do avanço físico real das atividades em relação ao cronograma Prevision em uma data de referência específica — captada diretamente pelo engenheiro ou estagi&aacute;rio em campo.
 
-Importação de medições disponível também via [Prevision](05_integracoes.md#2-prevision-planejamento-de-obras) (`measurementsTasksPage`).
+#### Conceito: o que é uma medição
 
-**Chave de privilégio:** `physical`
+Uma medição registra, para cada atividade do cronograma ativo, **quanto foi executado** (valor realizado) e **quanto era esperado** (valor previsto pela baseline na data de referência). A partir dessa comparação, o sistema calcula automaticamente os indicadores de desempenho da obra.
+
+```
+Baseline (Prevision)  →  expectedAtDate(refDate)  →  expected por atividade
+Cronograma Atual      →  globalDone por atividade  →  measured por atividade
+                                  ↓
+           PPC = Σ(realizado) / Σ(esperado)   (Percent Plan Complete)
+           PPCC = PPC acumulado histórico
+           flagColor: 🔴 < 95% da meta | 🟡 próximo | 🟢 dentro da meta
+```
+
+#### Modelo de dados — `PhysicalMeasurement`
+
+| Campo | Descrição |
+|-------|-----------|
+| `measurement` | Mapa `{actividadeId → valorRealizado}` — o dado central da medição |
+| `expected` | Mapa `{actividadeId → valorEsperado}` — previsto pela baseline na data |
+| `refDate` | Data de referência da medição |
+| `scheduleId` | Cronograma Prevision usado como baseline |
+| `comments` | Mapa `{actividadeId → comentário}` — observações por atividade |
+| `measurementProblems` | Mapa `{actividadeId → [problemas]}` — problemas detectados (manual ou por IA) |
+| `criticalActivities` | Lista de IDs das atividades do caminho crítico nesta data |
+| `lstSCurve` | Série histórica para composição da Curva S |
+| `generalComments` | Observações gerais da medição (visíveis no cabeçalho da análise) |
+| `generalCommentsLastEditedBy/At` | Auditoria da última edição das obs. gerais |
+| `ppc` | PPC calculado: `Σrealizado / Σesperado` |
+| `ppcc` | PPC acumulado (soma histórica) |
+| `expectedPercentage` / `donePercentage` | % global acumulado previsto e realizado |
+| `mExpectedPercentage` / `mDonePercentage` | % do período (delta desde a medição anterior) |
+| `isPreview` | Indica que é uma medição de prévia (não afeta histórico principal) |
+| `media` | Metadados de mídia associados |
+
+#### Histórico de Medições (Lista)
+
+A tela principal mostra a lista cronológica de todas as medições com um **tile** por medição exibindo:
+
+- **Acumulado:** % previsto vs. % realizado (desde o início da obra)
+- **Do período:** delta da medição atual menos a anterior — mostra o avanço do mês
+- **Diferença:** desvio acumulado `realizado − previsto`
+- **PPC:** Percent Plan Complete da medição
+- **Flag de desempenho:**
+
+| Cor | Critério |
+|-----|---------|
+| 🔴 Vermelho | Realizado do período < 95% do previsto do período |
+| 🟡 Amarelo | Realizado do período ≈ previsto (margem apertada) |
+| 🟢 Verde | Realizado do período ≥ previsto do período |
+
+**Tooltip** ao passar o cursor exibe: todos os percentuais (acumulado e período), diferença e PPC com o nome do responsável.
+
+**Criação:** botão `+` na AppBar abre o seletor de data → compara a baseline com o cronograma atual para construir o mapa `expected` e inicia a sessão de edição.
+
+**Importação via Prevision:** medições registradas no Prevision podem ser importadas diretamente via `measurementsTasksPage` + `measurementTask(id)`, trazendo os dados de avanço por atividade já calculados na plataforma de planejamento.
+
+#### Tela de Análise — abas
+
+Ao abrir uma medição (criar ou revisar), a tela de análise apresenta 4 abas:
+
+| Aba | Conteúdo |
+|-----|----------|
+| **Tabela de Medição** | Grid de atividades por lote/serviço com entrada de valores, comentários e flag de desempenho por linha (ver detalhes abaixo) |
+| **Análise de Problemas** | Dashboard dos problemas registrados por categoria, atividade e frequência; gráficos de distribuição |
+| **Planos de Ação** | Planos de ação vinculados a esta medição — permite criar, vincular ou visualizar diretamente |
+| **KAI** | Análise automatizada por IA: resumo do desempenho, atividades críticas em risco, sugestões de ação priorizadas |
+
+No **topo da tela**, o campo de **observações gerais** é editável por admins e pelo criador da medição — serve para registrar o contexto da semana (contextos externos, decisões tomadas, etc.).
+
+#### Grid de Atividades (Tabela de Medição)
+
+A tabela central usa o `SfDataGrid` (Syncfusion) com as seguintes capacidades:
+
+- **Colunas mensais** geradas dinamicamente conforme o range de datas do cronograma
+- **Ordenação** por qualquer coluna
+- Por linha (atividade), o usuário informa:
+  - % realizado ou quantidade executada
+  - Comentário / observação técnica sobre a atividade
+  - Problemas vinculados (seleção de causa raiz por categoria default)
+- **Detecção automática de problemas por IA:** ao salvar um comentário, o sistema envia o texto para análise e identifica a categoria de problema automaticamente, reduzindo o esforço de classificação manual
+- **Planos de ação por atividade:** botão em cada linha abre o histórico de planos vinculados àquela atividade, com opção de criar novo ou vincular uno existente
+
+#### Edição Colaborativa — `_dirtyActivityIds`
+
+O controller mantém um conjunto de **IDs de atividades modificadas nesta sessão** (`_dirtyActivityIds`). Ao salvar, apenas esses campos são escritos no Firestore via **dot-notation** (`measurement.{actividadeId}`):
+
+```
+Engenheiro A mede Torre 1 → escreve measurement.act_001, measurement.act_002
+Engenheiro B mede Torre 2  → escreve measurement.act_105, measurement.act_106
+(simultâneos, sem sobrescrever os dados um do outro)
+```
+
+Esse mecanismo garante que **múltiplos engenheiros medindo simultaneamente em torres ou lotes diferentes não se sobreponham**, mesmo em cenários de reconexão offline → online.
+
+#### Suporte Offline
+
+O `PhysicalController` monitora conectividade em tempo real (`Connectivity`). Quando offline:
+- A edição local continua normalmente sobre os dados em memória
+- Ao reconectar, o dirty set é flushado para o Firestore com apenas as atividades alteradas
+- O indicador `isConnected` na view alerta o usuário sobre o estado da conexão
+
+#### Exportação
+
+| Formato | Conteúdo |
+|---------|----------|
+| PDF | Tabela completa da medição com formatação, flag de desempenho e resumo de indicadores; pode ser enviado por e-mail diretamente da tela |
+| Excel | Export via Syncfusion do grid completo |
+| E-mail | Fluxo integrado: gera PDF → solicita lista de destinatários → envia via SendGrid |
+
+**Chave de privilégio:** `physical` (edição) · `physical_edit` (edição nas últimas 5 medições) · admin (acesso irrestrito)
 
 ---
 
-### 3.2 Painel de Produção
+### 3.2 Painel de Produção — Monkey Chart
 
-Matriz de produção no formato **Monkey Chart** orientada ao cronograma: cada célula (lote × serviço) exibe o status de conclusão com código de cor.
+O **Painel de Produção** é a visão matricial macro do andamento da obra. Exibe o status de cada célula da EAP no formato **lote × serviço**, permitindo ao gestor identificar de relance quais frentes estão atrasadas, dentro do prazo ou concluídas.
 
-| Cor | Significado |
-|-----|-------------|
-| Verde | Concluído |
-| Amarelo | Em progresso, dentro do prazo |
-| Azul | Planejada |
-| Vermelho | Atrasada |
+#### Formato da grade
 
-Toque na célula abre os detalhes da atividade e permite edição direta.
+Cada célula da matriz representa **uma atividade** (cruzamento de um lote×pavimento com um tipo de serviço):
+
+| Cor da célula | Significado |
+|---------------|-------------|
+| 🟢 Verde | Atividade concluída (100% realizado) |
+| 🟡 Amarelo | Em progresso, dentro do prazo planejado |
+| 🔵 Azul | Planejada — ainda não iniciada mas no prazo |
+| 🔴 Vermelho | Atrasada — data prevista ultrapassada sem conclusão |
+
+O índice de produtividade calculado para cada célula pode ser exibido diretamente sobre a cor, tornando possível identificar não apenas **se está atrasado** mas **o quanto a equipe está produzindo** em relação à meta.
+
+#### Interação
+
+- **Clique na célula:** abre os detalhes da atividade com dados de progresso, comentários, planos de ação e histórico de medições
+- **Zoom (`monkeyTileScale`):** controle deslizante para ajustar o tamanho das células — útil em obras com muitos lotes ou serviços para visão panorâmica
+- **Painel de estatísticas laterais:** colapsável; exibe contagens por status, distribuição de atraso e indicadores de produtividade agregados
+
+#### Uso em reuniões de gestão
+
+A grade é especialmente usada em **reuniões de produção semanais** como visual de controle: a equipe consegue identificar rapidamente quais lotes/serviços precisam de atenção e quais planos de ação estão ativos por frontem — sem precisar abrir cada atividade individualmente.
 
 **Chave de privilégio:** `baseline_view`
 
@@ -379,12 +710,160 @@ Aplicação digital de checklists de inspeção Lean (5S) com estrutura hierárq
 
 ### 5.3 Inspeção Final de Obra e de Unidades
 
-A inspeção técnica pré-entrega por engenheiro é realizada no contexto de cada unidade (ver [Seção 7 — Controle de Unidades](#7-controle-de-unidades)):
+Módulo para inspeção técnica pré-entrega realizada por engenheiro, unidade a unidade. Cobre checklist técnico-normativo de ambientes internos, registro de não-conformidades (NCs) com evidência fotográfica e marcação em planta, acompanhamento de reinspção e painel analítico de qualidade por obra.
 
-- **Inspeção Final de Unidade:** checklist técnico-normativo com pontos de atenção e fotos, assinatura digital do engenheiro, geração de relatório de inspeção para arquivo técnico
-- **Checklist de Obra (pré-entrega):** verificação item a item em campo, captura de foto de evidência, log de quem executou, status por item (`pendente / conforme / não conforme / N/A`)
+**Chave de privilégio:** `inspection_final_qualidade` (acesso ao Painel de Qualidade; execução de inspeção disponível para todos usuários com acesso à unidade)
 
-Ver detalhes completos em [7.5 Aba Checklist de Obra](#75-aba-checklist-de-obra) e [7.7 Aba Inspeção Final Técnica](#77-aba-inspeção-final-técnica).
+#### Fluxo de Status
+
+```
+draft ──► in_progress ──► completed ──► pending_reinspection ──► closed
+                                               ↑ (se há NCs abertas ao finalizar)
+```
+
+| Status | Significado |
+|--------|-------------|
+| `draft` | Criada mas não iniciada |
+| `in_progress` | Execução ativa (ambientes sendo vistoriados) |
+| `completed` | Todos itens avaliados; sem NCs pendentes (ou ignoradas) |
+| `pending_reinspection` | Concluída com NCs que precisam de reinspção |
+| `closed` | Reinspção encerrada (NCs aprovadas ou reaberturas resolvidas) |
+
+#### Modelo de Dados (`InspectionFinal`)
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `id` | string | UUID gerado localmente |
+| `siteId / unitId` | string | Obra e unidade inspecionada |
+| `towerName / unitName` | string | Desnormalizados para exibição |
+| `status` | `InspectionFinalStatus` | Ver fluxo acima |
+| `templateId / templateVersion` | string / int | Template de checklist base |
+| `environmentsConfig` | `List<EnvironmentConfig>` | Snapshot por ambiente (nome, quantidade, ordem, habilitado) |
+| `croquiRefs` | `List<InspectionCroquiRef>` | Plantas/croquis vinculados (suporta múltiplos para duplex/triplex) |
+| `participants` | `List<InspectionParticipant>` | Equipe presente na inspeção |
+| `workOrderSfId` | string | ID do Work Order no Salesforce (rastreabilidade) |
+| `totalItems / conformCount / nonConformCount / naCount` | int | Contadores de itens |
+| `openIssues` | int | NCs ainda abertas (controla badge na entrada) |
+| `conformancePercent` | double | `(conform + na) / total` |
+| `schemaVersion` | int | Controle de compatibilidade |
+| `createdAt / updatedAt` | DateTime | Auditoria |
+
+#### 5.3.1 Tela de Entrada (`InspectionEntryView`)
+
+Ponto de acesso por unidade. Exibe 4 cartões de ação:
+
+| Cartão | Rota | Condição |
+|--------|------|----------|
+| **Criar Inspeção** | `/inspection-final-config` | Sempre disponível |
+| **Continuar Inspeção** | `/inspection-final-execute` | Se há inspeção `in_progress` |
+| **Reinspecionar Pendências** | `/inspection-final-reinspect` | Se há inspeção `pending_reinspection`; exibe badge com nº de NCs abertas |
+| **Atualizar Inspeções** | — | Recarrega lista da unidade |
+| **Painel de Qualidade** | `/inspection-quality-dashboard` | Requer privilégio `inspection_final_qualidade` ou admin |
+
+Histórico de inspeções da unidade listado abaixo, com status, data, contagem de NCs e opção de exclusão (admin).
+
+#### 5.3.2 Configuração (`InspectionConfigView`)
+
+Antes de iniciar, o engenheiro configura a inspeção:
+
+- **Equipe (Participants):** adiciona colaboradores da obra que participam da vistoria (`InspectionParticipant` com `id`, `name`, `role`).
+- **Croqui / Planta:** seleciona uma ou mais plantas da unidade (`InspectionCroquiRef`). Suporta múltiplos croquis para unidades duplex/triplex.
+- **Ambientes:** lista gerada a partir do template; cada `EnvironmentConfig` pode ser habilitado/desabilitado e ter quantidade ajustada (ex.: 2 quartos). Opções de menu: *Habilitar Todos*, *Desabilitar Todos*, *Salvar como Modelo*, *Iniciar Inspeção*.
+- **Template de obra:** quando há múltiplos templates disponíveis, chip de seleção permite trocar o modelo ativo antes de iniciar.
+
+O botão FAB `rocket_launch` confirma e cria o documento `InspectionFinal` + subcoleções no Firestore, avançando para execução.
+
+#### 5.3.3 Execução (`InspectionExecuteView`)
+
+Tela principal de vistoria:
+
+**Cabeçalho:** `totalAnswered / totalItems` respondidos + `LinearProgressIndicator` com percentual geral. Botão direito navega ao Resumo.
+
+**Barra de Ambientes:** `TabBar` horizontal colorido (themePurple). Cada aba exibe ícone de status do ambiente (check verde = concluído, pending laranja = em andamento, círculo vazio = pendente) e nome. Itens carregados com *lazy-load* ao entrar na aba.
+
+**Lista de Itens:** separada em dois grupos:
+- *Itens de Liberação* (laranja) — pré-requisitos críticos
+- *Itens de Verificação* (roxo) — itens padrão
+
+Cada item pode ser um **sistema** (cabeçalho expansível com subsistemas aninhados) ou folha. O status do sistema é derivado dos subsistemas: verde se todos conformes, vermelho se algum NC, cinza + circular se nem todos avaliados.
+
+**Ação por item (swipe/slidable):**
+
+| Deslize | Ação |
+|---------|------|
+| Esquerda (verde) | Marcar **Conforme** |
+| Esquerda (cinza) | Marcar **N/A** |
+| Direita (vermelho) | Registrar **Não Conformidade** → abre `InspectionIssueView` |
+
+Ao marcar Conforme em item que já possui NCs registradas, um diálogo de confirmação informa que as pendências continuarão existindo.
+
+**Cascata de status:** ao marcar um sistema-cabeçalho, o status se propaga para todos os subsistemas filhos.
+
+**Auto-save:** toda alteração de status é aplicada localmente de forma imediata (sem loading) e persistida no Firestore de forma assíncrona. Contadores de ambiente e inspeção também são atualizados assincronamente via `_updateEnvCounters()`.
+
+**Barra inferior:** botão *Finalizar Inspeção* disponível quando todos os ambientes estão concluídos (`allEnvironmentsCompleted`). Ao finalizar, a inspeção transita para `completed` ou `pending_reinspection` conforme existência de NCs abertas.
+
+#### 5.3.4 Registro de Não-Conformidades (`InspectionIssueView`)
+
+Formulário completo para criar ou editar uma NC:
+
+**Taxonomia assistida por IA:** campo de descrição livre dispara `TaxonomyController._suggestTaxonomyFromDescription()` via `AiTaxonomyService`. Resultado preenche cascata de pickers: *Item → Sistema → Descrição → Falha*. Usuário pode buscar manualmente ou aceitar sugestão.
+
+**Severidade:** seletor com 4 níveis coloridos:
+
+| Nível | Cor |
+|-------|-----|
+| `low` | Cinza/verde |
+| `medium` | Laranja |
+| `high` | Vermelho |
+| `critical` | Vermelho escuro |
+
+**Fotos + Sketch:** `PhotoSketchWidget` permite captura direta de câmera ou galeria, com anotação/desenho sobre a imagem antes de salvar.
+
+**Marcação em croqui (`_CroquiMarkerBoard`):** croquis carregados via `croquiRefs`. Para unidades com múltiplos croquis (duplex/triplex), um `TabController` exibe uma aba por planta. O responsável pode colocar marcadores com coordenadas `(x, y)` normalizadas + foto por marcador.
+
+**Responsável:** picker da lista `crewList` da obra.
+
+**Comentários livres:** campo de texto opcional.
+
+#### 5.3.5 Reinspção (`InspectionReinspectView`)
+
+Lista as NCs com status `resolved` aguardando aprovação do engenheiro. Cabeçalho mostra `avaliadas / total` e indicador de progresso. Por NC (swipe ou botões):
+
+- **Aprovar** → NC vai para `approved`; item avaliado some ou fica opaco.
+- **Reabrir** → modal exige motivo obrigatório; NC retorna a `reopened → in_progress`.
+
+Ao avaliar todas, a inspeção pode ser encerrada (`closed`).
+
+#### 5.3.6 Resumo e Exportação (`InspectionSummaryView`)
+
+Tela de resultados após execução. Exibe:
+- Percentual de conformidade (`conformancePercent`) e contadores por status.
+- Lista de NCs agrupadas por ambiente, com status e severidade.
+- Detalhe de cada NC via `showIssueDetailSheet`.
+- **Exportação PDF** (`InspectionPdfGenerator.generate`) com capa, tabela de ambientes, lista de NCs com fotos, marcadores de croqui e assinaturas. Acionado via ícone na AppBar.
+
+#### 5.3.7 Painel de Qualidade (`InspectionQualityDashboardView`)
+
+Dashboard analítico multi-inspeção. Suporta dois modos:
+- **Escopo por unidade** (`unitId` preenchido): NCs de todas as inspeções históricas da unidade.
+- **Escopo de obra** (`siteWide: true`): todas inspeções de toda a obra (visão do gestor de qualidade).
+
+**5 abas:**
+
+| Aba | Conteúdo |
+|-----|----------|
+| **Dashboard** | `QualityDashboardAnalyticsTab` — KPIs, gráficos de distribuição por severidade, evolução temporal |
+| **Por Item** | NCs agrupadas por nome do item; clique filtra a aba Lista |
+| **Por Cômodo** | NCs agrupadas por ambiente; clique filtra |
+| **Por Unidade** | NCs agrupadas por torre/unidade; clique filtra |
+| **Lista** | Tabela filtrada de todas NCs com chips de filtro ativos |
+
+**Filtros disponíveis:** Status, Torre, Unidade, Ambiente, Nome do Item. Toggle *Mostrar aprovadas* oculta/exibe NCs já fechadas. Cada NC pode ser editada inline via `showIssueDetailSheet` com atualização reativa.
+
+#### Integração com Salesforce
+
+Inspeções vinculadas a Work Orders do Salesforce via `workOrderSfId`. O controller de personalizações (`InspectionFinalController`) carrega Work Orders ativos via Cloud Function `getWorkOrders`, filtrando por `assetId` e pelo `inspectionFinalWorkTypeId = '08qU40000000MjhIAE'`, com paginação de 50 registros por página.
 
 ---
 
@@ -793,3 +1272,9 @@ Suporte a acúmulo mensal e exportação via impressão do browser.
 ---
 
 *Documento: Módulos de Gestão de Obra | Versão 2.0 | Kaizen Gerenciamento de Obras*
+ção Lean | Rotinas de Gestão | `lean_inspection` | PDF |
+| Gestão de FVS | Qualidade | `fvs_fill` / `fvs_approval` / `quality_manager` | PDF |
+| Custo e Orçamento | Custo e Orçamento | `cost_control_view` | Excel |
+| Almoxarifado Digital | Gestão de Materiais | `warehouse_view` | Excel, CSV |
+| Unidades | Controle de Unidades | `units` | PDF (vistoria, inspeção) |
+| Reserva de Veículos | Outros Módulos | `vehicle_reservation` | — |

@@ -15,6 +15,7 @@ toc: true
 3. [Azure Synapse Analytics](#3-azure-synapse-analytics)
 4. [Mega ERP (Materiais)](#4-mega-erp-materiais)
 5. [Firebase Cloud Messaging (Notificações)](#5-firebase-cloud-messaging-notificações)
+   - [5.4 Central de Notificações (Inbox)](#54-central-de-notificações-inbox)
 6. [Resumo das Integrações](#6-resumo-das-integrações)
 7. [Considerações de Segurança](#7-considerações-de-segurança)
 
@@ -329,6 +330,104 @@ Body: { topicName: "pedidos_{clientId}_{branchId}", subscribe: true }
 - Service Worker intercepta mensagens FCM mesmo com o app fechado
 - Banner de notificação nativo do sistema operacional exibido
 - Clique na notificação abre diretamente a tela relevante (deep link via `route` no payload)
+
+### 5.4 Central de Notificações (Inbox)
+
+Além das notificações push nativas do sistema operacional, o Kaizen mantém um **inbox persistente** no Firestore com uma central de notificações acessível de qualquer tela via ícone de sino.
+
+#### Arquitetura
+
+```
+FCM push recebido
+     │
+     ├─► Handler foreground (FirebaseMessagingService)
+     │        └─► _persistToInbox() → Firestore users/{uid}/notifications/{docId}
+     │
+     └─► Cloud Function (backend) → grava o mesmo documento Firestore
+              (mesmo docId determinístico → sem duplicatas)
+                        │
+              NotificationInboxService (stream em tempo real)
+                        │
+              NotificationPanel (overlay lateral na UI)
+```
+
+#### `NotificationInboxService`
+
+Serviço GetX registrado globalmente após login. Mantém stream Firestore em tempo real:
+
+- **Path Firestore:** `users/{uid}/notifications/{notifId}` (escopo por usuário, não por tenant — garante portabilidade entre obras)
+- **Limite:** 100 documentos consultados; exibe as 50 mais recentes ordenadas por `createdAt DESC` (ordenação feita no Dart para evitar documentos invisíveis com `serverTimestamp()` pendente)
+- **Observáveis:** `RxList<NotificationModel> notifications`, `RxInt unreadCount`
+- **Auto-reconexão:** em caso de erro no stream, agenda nova tentativa em 5 segundos (`_listeningUid + _listeningClientId` garantem que só reconecta para o mesmo contexto)
+- **Ciclo de vida:** `startListening()` chamado ao fazer login; `stopListening()` ao fazer logout (limpa lista e zera contador)
+- **`ensureListening()`:** chamado ao abrir o painel — reinicia o stream se mudou de usuário/cliente
+
+#### `_persistToInbox` — Idempotência entre app e Cloud Function
+
+Para evitar duplicatas quando tanto o app quanto a Cloud Function gravam a mesma notificação:
+
+```
+docId = "${type}_${entityId}" (sanitizado)
+→ ref.set({...}, SetOptions(merge: true))
+```
+
+O mesmo `docId` determinístico garante que o segundo write (app ou CF) apenas sobrescreva o primeiro, sem criar duplicatas. `createdAt` usa `Timestamp.fromDate(DateTime.now())` em vez de `serverTimestamp()` para que o documento seja visível imediatamente no cache local.
+
+#### `NotificationPanel` — Widget do painel lateral
+
+Overlay animado disponível em qualquer tela via `Stack` global:
+
+| Propriedade | Valor |
+|-------------|-------|
+| Largura | 380px (desktop) / 100% da tela (mobile < 600px) |
+| Animação | `AnimatedSwitcher` 280ms |
+| Fundo dim | `Colors.black.withOpacity(0.45)` — clique fecha o painel |
+| Acionamento | Ícone de sino (`NotificationBadge`) no top bar |
+
+**Cabeçalho do painel:** ícone de notificação + título "Central de Notificações" + botão *Marcar todas como lidas* (visível somente quando `unreadCount > 0`) + botão fechar.
+
+**Lista:** `ListView.separated` com separador sutil. Cada item marcado como lido automaticamente ao ser tocado, chamando `FirebaseMessagingService.navigateFromData()` para navegar até a entidade relacionada.
+
+**Estados:** lista vazia → "Tudo em dia ✓" com ícone grande; serviço não disponível (não logado) → mensagem de login.
+
+#### `NotificationBadge`
+
+Widget wrapper que envolve qualquer widget filho (o ícone de sino) com um badge vermelho:
+
+```dart
+NotificationBadge(child: Icon(Icons.notifications))
+```
+
+Usa `Obx` para observar `NotificationInboxService.unreadCount` e renderizar o badge de forma reativa. Se o serviço não estiver registrado (usuário não logado), retorna o filho sem badge.
+
+#### `NotificationModel` — Tipos suportados
+
+| Tipo | Ícone | Cor | Label | Deep-link |
+|------|-------|-----|-------|-----------|
+| `mention_comment` | `alternate_email` | Azul | Menção | Tela de Planos de Ação |
+| `action_plan_assigned` | `assignment_ind` | Roxo | Plano de Ação | Tela de Planos de Ação |
+| `restriction_due` | `warning_amber_rounded` | Laranja | Restrição | Tela de Restrições (Mid-term) |
+| `restriction_assigned` | `assignment_late` | Laranja escuro | Restrição | Tela de Restrições |
+| `workorder_chatter` | `chat_bubble_outline` | Teal | Chat OT | Módulo AT |
+| `appointment_created` | `calendar_month` | Verde | Agendamento | Work Order específica |
+| `appointment_reminder` | `alarm` | Âmbar | Lembrete | Work Order específica |
+| `appointment_status_change` | `update` | Índigo | Status | Work Order específica |
+| `requisition_status_changed` | `inventory_2_outlined` | Roxo | Requisição | Tela de Requisições |
+| `new_material_order` | `shopping_cart_outlined` | Roxo escuro | Pedido | Work Order específica |
+| `inspection_assigned` | `assignment_ind_outlined` | Teal | Inspeção | Menu da obra |
+| `inspection_closed` | `verified_outlined` | Verde | Inspeção | Menu da obra |
+| `inspection_reinspection_requested` | `refresh` | Laranja | Reinspeção | Menu da obra |
+| `unknown` | `notifications_outlined` | Cinza | Notificação | — |
+
+#### Deep-link por tipo (`_navigateFromNotification`)
+
+A lógica de navegação em `FirebaseMessagingService` usa o campo `type` do payload para decidir para onde navegar:
+
+- **appointments / material_order / workorder_chatter:** extrai `workOrderId` do payload e abre `WorkOrderDetailsPage` (se já no módulo AT) ou navega para `Routes.AT_MAIN`; armazena `pendingOpenWorkOrderId` para abrir automaticamente quando o controller carregar
+- **action_plan / mention_comment:** armazena `pendingOpenActionPlanId`; se `ActionPlanController` já está registrado, chama `checkAndOpenPendingPlan()` diretamente; senão, navega para `Routes.ACTION_PLAN`
+- **restriction_due / restriction_assigned:** armazena `pendingOpenRestrictionId`; navega para `Routes.MID_TERM` ou chama `checkAndOpenPendingRestriction()`
+- **requisition_status_changed:** armazena `pendingOpenRequisitionId`; navega para `Routes.SITE_MENU` com `openWarehouse: true`
+- **inspection_*:** navega para `Routes.SITE_MENU` passando `siteId`
 
 ---
 
