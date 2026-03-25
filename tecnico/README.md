@@ -1,15 +1,15 @@
 ---
 layout: page
 title: "Documentação Técnica"
-permalink: /tecnico/
+permalink: /kaizen/tecnico/
 category: "Índice"
 order: 0
 toc: false
 ---
 
-# Kaizen — Documentação Técnica para Precificação
+# Kaizen — Documentação Técnica
 
-> **Público-alvo:** Equipes de TI de empresas interessadas em adquirir o Kaizen, para fins de avaliação técnica e precificação interna.
+> **Público-alvo:** Equipes de TI, para fins de avaliação técnica.
 >
 > **Data de referência:** Março de 2026  
 > **Versão do sistema:** Flutter 3.x · Banco de dados em nuvem (Google Cloud) · Salesforce Integration

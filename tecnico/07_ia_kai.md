@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "Inteligência Artificial - KAI"
-permalink: /tecnico/ia/
+permalink: /kaizen/tecnico/ia/
 category: "IA"
 order: 7
 toc: true
