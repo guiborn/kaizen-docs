@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "Módulo de Assistência Técnica"
-permalink: /kaizen-docs/tecnico/at/
+permalink: /kaizen/tecnico/at/
 category: "Módulos"
 order: 3
 toc: true

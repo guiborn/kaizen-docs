@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "Arquitetura Geral"
-permalink: /kaizen-docs/tecnico/arquitetura/
+permalink: /kaizen/tecnico/arquitetura/
 category: "Arquitetura"
 order: 1
 toc: true
