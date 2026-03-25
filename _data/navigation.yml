@@ -1,21 +1,7 @@
 # Site Navigation Structure
 # This file controls the main menu
 
-- title: Documentação Técnica
-  items:
-    - title: Arquitetura Geral
-      url: /tecnico/arquitetura/
-    - title: Módulos de Gestão
-      url: /tecnico/modulos/
-    - title: Módulo AT
-      url: /tecnico/at/
-    - title: Módulo Cotações
-      url: /tecnico/cotacoes/
-    - title: Integrações
-      url: /tecnico/integracoes/
-    - title: Perfis e Acesso
-      url: /tecnico/acesso/
-    - title: IA - Kai
-      url: /tecnico/ia/
-    - title: Cloud Functions & API
-      url: /tecnico/api/
+- title: Home
+  url: /
+- title: Técnico
+  url: /tecnico/
