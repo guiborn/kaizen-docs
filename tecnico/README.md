@@ -89,7 +89,7 @@ O sistema é **multi-tenant** (múltiplos clientes isolados na mesma infraestrut
 
 | Requisito | Detalhe |
 |---|---|
-| Sistemas de origem | Salesforce CRM (obrigatório para AT e Unidades); ERP Mega (opcional, para materiais); Azure Synapse (opcional, para BI de custo) |
+| Sistemas de origem | Salesforce CRM (obrigatório para AT e opcional para Inspeção Final da Qualidade / Unidades); ERP Mega (opcional, para materiais); Azure Synapse (opcional, para BI de custo) |
 | Conectividade | Acesso HTTPS para infraestrutura de backend (Google Cloud); acesso à API REST do Salesforce |
 | Dispositivos | Qualquer browser moderno (Chrome, Edge, Safari); Android 9+ ou iOS 14+ para app nativo |
 | Dados exportáveis | Excel (.xlsx) para relatórios; PDF para FVS, planos de ação e etiquetas |
