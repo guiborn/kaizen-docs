@@ -1,0 +1,21 @@
+# Site Navigation Structure
+# This file controls the main menu
+
+- title: Documentação Técnica
+  items:
+    - title: Arquitetura Geral
+      url: /kaizen/tecnico/arquitetura/
+    - title: Módulos de Gestão
+      url: /kaizen/tecnico/modulos/
+    - title: Módulo AT
+      url: /kaizen/tecnico/at/
+    - title: Módulo Cotações
+      url: /kaizen/tecnico/cotacoes/
+    - title: Integrações
+      url: /kaizen/tecnico/integracoes/
+    - title: Perfis e Acesso
+      url: /kaizen/tecnico/acesso/
+    - title: IA - Kai
+      url: /kaizen/tecnico/ia/
+    - title: Cloud Functions & API
+      url: /kaizen/tecnico/api/

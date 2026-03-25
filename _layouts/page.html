@@ -1,0 +1,63 @@
+---
+layout: default
+---
+
+<article class="post">
+  <header class="post-header">
+    <h1 class="post-title">{{ page.title }}</h1>
+    {% if page.category %}
+      <p class="post-meta">
+        <span class="badge badge-category">{{ page.category }}</span>
+        {% if page.date %}
+          <span class="post-date">{{ page.date | date: "%d de %B de %Y" }}</span>
+        {% endif %}
+      </p>
+    {% endif %}
+  </header>
+
+  <div class="post-content">
+    {% if page.toc != false %}
+      <div class="toc-wrapper">
+        <h3>Índice</h3>
+        <nav class="toc">
+          {% include toc.html html=content %}
+        </nav>
+      </div>
+    {% endif %}
+
+    {{ content }}
+  </div>
+
+  {% if page.tags %}
+    <footer class="post-footer">
+      <div class="tags">
+        <strong>Tags:</strong>
+        {% for tag in page.tags %}
+          <span class="tag">{{ tag }}</span>
+        {% endfor %}
+      </div>
+    </footer>
+  {% endif %}
+</article>
+
+<nav class="post-navigation">
+  <div class="nav-prev">
+    {% if page.previous %}
+      <a href="{{ page.previous.url | relative_url }}" class="nav-link">
+        ← {{ page.previous.title }}
+      </a>
+    {% endif %}
+  </div>
+  <div class="nav-home">
+    <a href="{{ '/kaizen/tecnico' | relative_url }}" class="nav-link">
+      ↑ Voltar para Documentação
+    </a>
+  </div>
+  <div class="nav-next">
+    {% if page.next %}
+      <a href="{{ page.next.url | relative_url }}" class="nav-link">
+        {{ page.next.title }} →
+      </a>
+    {% endif %}
+  </div>
+</nav>

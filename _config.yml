@@ -1,0 +1,78 @@
+# Jekyll Configuration for Kaizen Technical Documentation
+# Build settings
+
+# Site metadata
+title: "Kaizen - Documentação Técnica"
+description: "Documentação técnica do sistema Kaizen de gestão de construção e assistência técnica"
+author: "Kaizen Team"
+url: "https://guiborn.github.io/kaizen"
+baseurl: "/kaizen"
+
+# Repository
+repository: "guiborn/kaizen"
+github_username: "guiborn"
+
+# Build settings
+theme: minima
+remote_theme: jekyll/minima
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-include-cache
+
+# Frontmatter defaults
+defaults:
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "page"
+
+# Markdown processor
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+  
+# Encoding
+encoding: utf-8
+
+# Exclude from processing
+exclude:
+  - .gitignore
+  - .bundle
+  - _site/
+  - vendor/
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - package*.json
+  - archive/
+  - "*.dart"
+
+# Include in processing
+include:
+  - _pages
+
+# Collections (optional, for future expansion)
+collections:
+  docs:
+    output: true
+    permalink: /docs/:path/
+
+# Minima theme customization
+minima:
+  skin: light
+  date_format: "%d %b %Y"
+  social_links:
+    - platform: github
+      user_url: https://github.com/guiborn
+    - platform: linkedin
+      user_url: https://linkedin.com
+
+# Custom metadata
+site_locale: "pt-BR"
+time_zone: "America/Sao_Paulo"

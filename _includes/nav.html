@@ -1,0 +1,36 @@
+{% if site.data.navigation %}
+  <ul class="nav-list">
+    {% for item in site.data.navigation %}
+      <li class="nav-item">
+        {% if item.url %}
+          <a 
+            href="{{ item.url | relative_url }}" 
+            class="nav-link {% if item.url == page.url %}active{% endif %}"
+          >
+            {{ item.title }}
+          </a>
+        {% else %}
+          <span class="nav-category">{{ item.title }}</span>
+          {% if item.items %}
+            <ul class="nav-subitems">
+              {% for subitem in item.items %}
+                <li class="nav-subitem">
+                  <a 
+                    href="{{ subitem.url | relative_url }}" 
+                    class="nav-link {% if subitem.url == page.url %}active{% endif %}"
+                  >
+                    {{ subitem.title }}
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+<!-- Fallback se data/navigation.yml não existir -->
+<a href="{{ '/kaizen' | relative_url }}" class="nav-link">Home</a>
+<a href="{{ '/kaizen/tecnico' | relative_url }}" class="nav-link">Técnico</a>
