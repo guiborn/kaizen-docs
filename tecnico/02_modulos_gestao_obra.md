@@ -640,18 +640,87 @@ Identificada → Em Andamento → Removida
 
 ### 4.2 Farol de Contratações
 
-Gestão do cronograma de suprimentos com semáforo visual (verde / amarelo / vermelho) baseado em SLAs configurados por fornecedor e categoria de insumo.
+O **Farol de Contratações** é o módulo de gestão do cronograma de suprimentos. Seu objetivo central é garantir que nenhuma atividade do cronograma de obra seja paralisada por falta de material ou serviço contratado a tempo. O módulo usa um semáforo visual (🟢🟡🔴) para sinalizar o risco de cada processo de compra em relação às datas do cronograma físico.
 
-**Dois objetos principais:**
+#### Conceito: vinculação ao cronograma físico
 
-| Objeto | Descrição |
-|--------|-----------|
-| **Itens de suprimento** | Nome, fornecedor, categoria, SLA padrão, margem de segurança e estoque mínimo |
-| **Processos de suprimento** | Status do processo de contratação com datas, responsáveis e vínculos às atividades do cronograma |
+Cada **item de suprimento** (material, serviço ou equipamento) é associado às **atividades do Prevision** que dele dependem. A partir da data de início da atividade mais urgente, o sistema calcula retroativamente as datas-limite de cada etapa do processo de compra, somando os prazos (SLAs) cadastrados.
 
-A matriz item × fornecedor exibe a situação de cada SLA com indicação visual de risco. O sistema antecipa alertas com base na data necessária de início da atividade vinculada menos o SLA de fornecimento — garantindo que as compras sejam iniciadas a tempo de não comprometer o cronograma.
+```
+Data de início da atividade (Prevision)
+         ↑
+   – margem de segurança
+         ↑
+   – SLA etapa N  (ex: entrega do fornecedor: 10 dias úteis)
+         ↑
+   – SLA etapa N-1 (ex: aprovação do pedido: 2 dias úteis)
+         ↑
+   – SLA etapa 1  (ex: solicitação de cotação: 1 dia útil)
+         ↑
+   ← DATA EM QUE O PROCESSO DEVE SER INICIADO
+```
 
-**Exportação:** CSV (`exportDatabaseCSV`) e Excel consolidado multi-obra (`SupplyScheduleExcel`)
+Se hoje ultrapassar a data de início calculada sem que o processo tenha sido aberto, o farol acende **vermelho**. Se estiver próximo (dentro da margem de alerta), acende **amarelo**. Caso haja tempo suficiente, permanece **verde**.
+
+#### Entidades principais
+
+| Entidade | Descrição |
+|----------|-----------|
+| **Item de suprimento** (`SupplyItem`) | O que precisa ser contratado: nome, fornecedor padrão, categoria, lista de SLAs por etapa, margem de segurança, responsável de compras (`buyerId`/`buyerName`) |
+| **Processo de contratação** (`SupplyProcess`) | Instância real de compra de um item para uma obra específica: status, responsável, lista de atividades vinculadas, datas calculadas por SLA, observações |
+| **SLA de etapa** | Prazo (em dias úteis) de cada passo do processo: ex. `Solicitar cotação`, `Receber propostas`, `Análise técnica`, `Aprovação`, `Emissão de pedido`, `Entrega`. Configurável por item ou por padrão global |
+| **Feriados customizados** | Cada obra pode ter feriados locais que são considerados no cálculo de dias úteis |
+
+#### Lógica do semáforo
+
+| Cor | Condição |
+|-----|----------|
+| 🟢 Verde | Processo iniciado e com folga, ou prazo de início futuro com margem confortável |
+| 🟡 Amarelo | Prazo de início iminente (dentro da margem de alerta) ou processo em andamento com SLA próximo do limite |
+| 🔴 Vermelho | Data de início calculada já passou sem processo aberto, ou SLA de etapa vencido |
+| ⚪ Cinza | Item sem atividade vinculada ou sem cronograma ativo |
+
+#### Telas e abas
+
+| Aba | Conteúdo |
+|-----|----------|
+| **Acompanhamento** | Tiles compactos por item e por obra, com semáforo e resumo do status de cada processo. Filtros por setor ativo, responsável, item e obra |
+| **Cronograma Visual** | Grade de Gantt por item: barras representando janelas de cada SLA ao longo do tempo. Permite visualizar sobreposição de prazos e gargalos de compra |
+| **Matriz SLA** | Tabela item × etapa de SLA com datas e status coloridos; útil para reuniões de suprimentos |
+| **Grid de Processos** | Listagem tabular completa de todos os processos com colunas de status, responsável e datas; suporta ordenação multicritério |
+
+#### Criação e gestão de processos
+
+- Ao criar um processo, o comprador seleciona as **atividades do Prevision** que dependem do item; o sistema calcula automaticamente as datas-chave pela cadeia de SLAs
+- Possibilidade de adicionar **atividades extras** fora do cronograma Prevision
+- O responsável de compras é selecionado a partir do **crew da obra** (time cadastrado na obra), evitando duplicidade de cadastros
+- É possível **reordenar as etapas de SLA** via drag-and-drop, e o cálculo recalcula instantaneamente
+- Campo de observações por processo para registro de ocorrências, justificativas e notas de negociação
+
+#### Alertas automáticos por e-mail
+
+Ao criar um processo, o usuário pode configurar um **alerta automático** que avisa por e-mail quando a data de início de contratação estiver se aproximando:
+
+- Data-alvo: primeira SLA calculada (quando o processo deve ser iniciado)
+- Antecedência configurável (ex.: alertar 7 dias antes)
+- Lista de destinatários por processo
+- Executado pela **Cloud Function `supplyAlerts`** (agendada, verifica todos os processos com SLA em risco e dispara notificações)
+
+#### Configurações e administração
+
+- **SLAs padrão globais:** configura as etapas e prazos usados como base ao criar novos itens, podendo ser sobrescritas por item
+- **Exceções:** regras que ajustam prazos para categorias específicas de insumo ou fornecedor (ex.: materiais importados com lead time maior)
+- **Migração de processos:** permite mover um processo de uma obra para outra em caso de remanejamento de equipe ou material
+- **Marcação de datas:** dialog de registro de datas reais de cada etapa, criando histórico de performance de fornecedores
+
+#### Exportações
+
+| Formato | Conteúdo |
+|---------|----------|
+| CSV (`exportDatabaseCSV`) | Dump completo de itens e processos, útil para integração com sistemas externos |
+| Excel multi-obra (`SupplyScheduleExcel`) | Planilha consolidada com todos os processos agrupados por obra — para envio à equipe de suprimentos |
+| PDF | Lista de processos formatada com status e responsáveis |
+| CSV de processos | Exportação filtrada dos processos visíveis na tela |
 
 **Chave de privilégio:** `supply_schedule` ou perfil admin
 
