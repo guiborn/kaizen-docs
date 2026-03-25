@@ -36,7 +36,7 @@ markdown: kramdown
 kramdown:
   input: GFM
   hard_wrap: false
-  
+
 # Encoding
 encoding: utf-8
 

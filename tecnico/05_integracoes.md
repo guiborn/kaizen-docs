@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "Integrações com Sistemas Externos"
-permalink: /kaizen/tecnico/integracoes/
+permalink: /tecnico/integracoes/
 category: "Integrações"
 order: 5
 toc: true

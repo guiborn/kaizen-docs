@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "Documentação Técnica"
-permalink: /kaizen/tecnico/
+permalink: /tecnico/
 category: "Índice"
 order: 0
 toc: false
