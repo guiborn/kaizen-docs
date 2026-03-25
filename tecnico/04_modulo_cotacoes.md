@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "Módulo de Cotações"
-permalink: /kaizen/tecnico/cotacoes/
+permalink: /kaizen-docs/tecnico/cotacoes/
 category: "Módulos"
 order: 4
 toc: true

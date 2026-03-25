@@ -5,11 +5,11 @@
 title: "Kaizen - Documentação Técnica"
 description: "Documentação técnica do sistema Kaizen de gestão de construção e assistência técnica"
 author: "Kaizen Team"
-url: "https://guiborn.github.io/kaizen"
-baseurl: "/kaizen"
+url: "https://guiborn.github.io/kaizen-docs"
+baseurl: "/kaizen-docs"
 
 # Repository
-repository: "guiborn/kaizen"
+repository: "guiborn/kaizen-docs"
 github_username: "guiborn"
 
 # Build settings

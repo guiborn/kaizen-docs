@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "Perfis de Acesso e Controle de Permissões"
-permalink: /kaizen/tecnico/acesso/
+permalink: /kaizen-docs/tecnico/acesso/
 category: "Segurança"
 order: 6
 toc: true

@@ -19,56 +19,56 @@ Nesta seção você encontra a documentação técnica completa sobre a arquitet
 
 ### 🏗️ Arquitetura
 
-[**Arquitetura Geral**](/kaizen/tecnico/arquitetura/)
+[**Arquitetura Geral**](/kaizen-docs/tecnico/arquitetura/)
 Visão geral da arquitetura do sistema, decisões de design, padrões utilizados e estrutura geral.
 
 ---
 
 ### 📦 Módulos
 
-[**Módulos de Gestão de Obra**](/kaizen/tecnico/modulos/)
+[**Módulos de Gestão de Obra**](/kaizen-docs/tecnico/modulos/)
 Descrição dos módulos de gestão de obra, funcionalidades, fluxos de trabalho e integrações.
 
 ---
 
 ### 🔧 Assistência Técnica (AT)
 
-[**Módulo AT - Assistência Técnica**](/kaizen/tecnico/at/)
+[**Módulo AT - Assistência Técnica**](/kaizen-docs/tecnico/at/)
 Documentação do módulo de assistência técnica, agendamento de serviços, gestão de ordens de trabalho.
 
 ---
 
 ### 💰 Cotações
 
-[**Módulo de Cotações**](/kaizen/tecnico/cotacoes/)
+[**Módulo de Cotações**](/kaizen-docs/tecnico/cotacoes/)
 Sistema de cotações, orçamentos e gestão de propostas.
 
 ---
 
 ### 🔗 Integrações
 
-[**Integrações do Sistema**](/kaizen/tecnico/integracoes/)
+[**Integrações do Sistema**](/kaizen-docs/tecnico/integracoes/)
 Integrações com Salesforce, Data Lake, APIs externas e terceiros.
 
 ---
 
 ### 🔐 Acesso e Perfis
 
-[**Perfis e Controle de Acesso**](/kaizen/tecnico/acesso/)
+[**Perfis e Controle de Acesso**](/kaizen-docs/tecnico/acesso/)
 Sistema de permissões, papéis de usuário, multi-tenancy e controle de acesso ao dados.
 
 ---
 
 ### 🤖 Inteligência Artificial
 
-[**IA Kai - Sistema de Sugestões**](/kaizen/tecnico/ia/)
+[**IA Kai - Sistema de Sugestões**](/kaizen-docs/tecnico/ia/)
 Módulo de inteligência artificial para sugestões, análises e automações.
 
 ---
 
 ### ☁️ Cloud Functions & API
 
-[**Cloud Functions e API REST**](/kaizen/tecnico/api/)
+[**Cloud Functions e API REST**](/kaizen-docs/tecnico/api/)
 Documentação técnica de Cloud Functions, endpoints REST, autenticação e status de APIs.
 
 ---
@@ -77,10 +77,10 @@ Documentação técnica de Cloud Functions, endpoints REST, autenticação e sta
 
 ## 🚀 Começar
 
-1. **Novo no Kaizen?** Comece pela [Arquitetura Geral](/kaizen/tecnico/arquitetura/)
-2. **Desenvolvedor frontend?** Veja a documentação dos [Módulos](/kaizen/tecnico/modulos/)
-3. **Trabalhando com backend?** Acesse a [API REST](/kaizen/tecnico/api/)
-4. **Consultando integrações?** Verifique [Integrações do Sistema](/kaizen/tecnico/integracoes/)
+1. **Novo no Kaizen?** Comece pela [Arquitetura Geral](/kaizen-docs/tecnico/arquitetura/)
+2. **Desenvolvedor frontend?** Veja a documentação dos [Módulos](/kaizen-docs/tecnico/modulos/)
+3. **Trabalhando com backend?** Acesse a [API REST](/kaizen-docs/tecnico/api/)
+4. **Consultando integrações?** Verifique [Integrações do Sistema](/kaizen-docs/tecnico/integracoes/)
 
 ## ℹ️ Sobre
 

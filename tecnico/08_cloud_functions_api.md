@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "Cloud Functions e API REST"
-permalink: /kaizen/tecnico/api/
+permalink: /kaizen-docs/tecnico/api/
 category: "Backend"
 order: 8
 toc: true

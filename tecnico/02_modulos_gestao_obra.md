@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "Módulos de Gestão de Obra"
-permalink: /kaizen/tecnico/modulos/
+permalink: /kaizen-docs/tecnico/modulos/
 category: "Módulos"
 order: 2
 toc: true
