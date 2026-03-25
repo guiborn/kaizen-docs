@@ -8,7 +8,7 @@ toc: false
 # Bem-vindo à Documentação Técnica Kaizen
 
 <div class="homepage-intro">
-  <p>Sistema modular de gestão de construção e assistência técnica construído com Flutter, Firebase e integração com Salesforce.</p>
+  <p>Sistema modular de gestão de construção e assistência técnica.</p>
 </div>
 
 ## 📚 Documentação Técnica
@@ -32,12 +32,7 @@ Nesta seção você encontra a documentação técnica completa sobre a arquitet
     Documentação do módulo de assistência técnica, agendamento de serviços, gestão de ordens de trabalho.</p>
   </div>
   <div>
-    <h3>💰 Cotações</h3>
-    <p><a href="{{ '/tecnico/cotacoes/' | relative_url }}"><strong>Módulo de Cotações</strong></a><br>
-    Sistema de cotações, orçamentos e gestão de propostas.</p>
-  </div>
-  <div>
-    <h3>🔗 Integrações</h3>
+    <h3> Integrações</h3>
     <p><a href="{{ '/tecnico/integracoes/' | relative_url }}"><strong>Integrações do Sistema</strong></a><br>
     Integrações com Salesforce, Data Lake, APIs externas e terceiros.</p>
   </div>

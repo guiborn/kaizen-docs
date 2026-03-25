@@ -30,7 +30,8 @@
       <div class="wrapper">
         <div class="site-header-content">
           <a class="site-title" href="{{ '/' | relative_url }}">
-            <span class="logo">📚</span> {{ site.title }}
+            <img class="site-logo" src="{{ '/assets/images/Logo R_R-01.png' | relative_url }}" alt="{{ site.title }}" />
+            <span class="site-title-text">{{ site.title }}</span>
           </a>
           <nav class="site-nav">
             {% include nav.html %}

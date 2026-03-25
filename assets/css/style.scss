@@ -45,23 +45,46 @@ body {
 .site-header {
   background: linear-gradient(135deg, $theme-purple 0%, $theme-purple-dark 100%);
   border-bottom: none;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.2);
+  padding: 16px 0;
 
   .site-title {
     color: white;
-    font-size: 24px;
+    font-size: 0;
     font-weight: 700;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 16px;
+    text-decoration: none;
+    transition: all 0.3s ease;
 
-    .logo {
-      font-size: 28px;
+    .site-logo {
+      height: 50px;
+      width: auto;
+      display: flex;
+      align-items: center;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+      transition: transform 0.3s ease;
+    }
+
+    .site-title-text {
+      font-size: 24px;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
     }
 
     &:hover {
       text-decoration: none;
-      opacity: 0.9;
+      opacity: 0.95;
+
+      .site-logo {
+        transform: scale(1.05);
+      }
+
+      .site-title-text {
+        color: #e0d5ff;
+      }
     }
   }
 }
@@ -70,7 +93,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 0;
+  padding: 8px 0;
 }
 
 .site-nav {
