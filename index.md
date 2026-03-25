@@ -16,71 +16,54 @@ toc: false
 Nesta seção você encontra a documentação técnica completa sobre a arquitetura, módulos, integrações e APIs do sistema Kaizen.
 
 <div class="docs-grid">
-
-### 🏗️ Arquitetura
-
-[**Arquitetura Geral**](/kaizen-docs/tecnico/arquitetura/)
-Visão geral da arquitetura do sistema, decisões de design, padrões utilizados e estrutura geral.
-
----
-
-### 📦 Módulos
-
-[**Módulos de Gestão de Obra**](/kaizen-docs/tecnico/modulos/)
-Descrição dos módulos de gestão de obra, funcionalidades, fluxos de trabalho e integrações.
-
----
-
-### 🔧 Assistência Técnica (AT)
-
-[**Módulo AT - Assistência Técnica**](/kaizen-docs/tecnico/at/)
-Documentação do módulo de assistência técnica, agendamento de serviços, gestão de ordens de trabalho.
-
----
-
-### 💰 Cotações
-
-[**Módulo de Cotações**](/kaizen-docs/tecnico/cotacoes/)
-Sistema de cotações, orçamentos e gestão de propostas.
-
----
-
-### 🔗 Integrações
-
-[**Integrações do Sistema**](/kaizen-docs/tecnico/integracoes/)
-Integrações com Salesforce, Data Lake, APIs externas e terceiros.
-
----
-
-### 🔐 Acesso e Perfis
-
-[**Perfis e Controle de Acesso**](/kaizen-docs/tecnico/acesso/)
-Sistema de permissões, papéis de usuário, multi-tenancy e controle de acesso ao dados.
-
----
-
-### 🤖 Inteligência Artificial
-
-[**IA Kai - Sistema de Sugestões**](/kaizen-docs/tecnico/ia/)
-Módulo de inteligência artificial para sugestões, análises e automações.
-
----
-
-### ☁️ Cloud Functions & API
-
-[**Cloud Functions e API REST**](/kaizen-docs/tecnico/api/)
-Documentação técnica de Cloud Functions, endpoints REST, autenticação e status de APIs.
-
----
-
+  <div>
+    <h3>🏗️ Arquitetura</h3>
+    <p><a href="{{ '/tecnico/arquitetura/' | relative_url }}"><strong>Arquitetura Geral</strong></a><br>
+    Visão geral da arquitetura do sistema, decisões de design, padrões utilizados e estrutura geral.</p>
+  </div>
+  <div>
+    <h3>📦 Módulos</h3>
+    <p><a href="{{ '/tecnico/modulos/' | relative_url }}"><strong>Módulos de Gestão de Obra</strong></a><br>
+    Descrição dos módulos de gestão de obra, funcionalidades, fluxos de trabalho e integrações.</p>
+  </div>
+  <div>
+    <h3>🔧 Assistência Técnica</h3>
+    <p><a href="{{ '/tecnico/at/' | relative_url }}"><strong>Módulo AT - Assistência Técnica</strong></a><br>
+    Documentação do módulo de assistência técnica, agendamento de serviços, gestão de ordens de trabalho.</p>
+  </div>
+  <div>
+    <h3>💰 Cotações</h3>
+    <p><a href="{{ '/tecnico/cotacoes/' | relative_url }}"><strong>Módulo de Cotações</strong></a><br>
+    Sistema de cotações, orçamentos e gestão de propostas.</p>
+  </div>
+  <div>
+    <h3>🔗 Integrações</h3>
+    <p><a href="{{ '/tecnico/integracoes/' | relative_url }}"><strong>Integrações do Sistema</strong></a><br>
+    Integrações com Salesforce, Data Lake, APIs externas e terceiros.</p>
+  </div>
+  <div>
+    <h3>🔐 Acesso e Perfis</h3>
+    <p><a href="{{ '/tecnico/acesso/' | relative_url }}"><strong>Perfis e Controle de Acesso</strong></a><br>
+    Sistema de permissões, papéis de usuário, multi-tenancy e controle de acesso ao dados.</p>
+  </div>
+  <div>
+    <h3>🤖 Inteligência Artificial</h3>
+    <p><a href="{{ '/tecnico/ia/' | relative_url }}"><strong>IA Kai - Sistema de Sugestões</strong></a><br>
+    Módulo de inteligência artificial para sugestões, análises e automações.</p>
+  </div>
+  <div>
+    <h3>☁️ Cloud Functions &amp; API</h3>
+    <p><a href="{{ '/tecnico/api/' | relative_url }}"><strong>Cloud Functions e API REST</strong></a><br>
+    Documentação técnica de Cloud Functions, endpoints REST, autenticação e status de APIs.</p>
+  </div>
 </div>
 
 ## 🚀 Começar
 
-1. **Novo no Kaizen?** Comece pela [Arquitetura Geral](/kaizen-docs/tecnico/arquitetura/)
-2. **Desenvolvedor frontend?** Veja a documentação dos [Módulos](/kaizen-docs/tecnico/modulos/)
-3. **Trabalhando com backend?** Acesse a [API REST](/kaizen-docs/tecnico/api/)
-4. **Consultando integrações?** Verifique [Integrações do Sistema](/kaizen-docs/tecnico/integracoes/)
+1. **Novo no Kaizen?** Comece pela <a href="{{ '/tecnico/arquitetura/' | relative_url }}">Arquitetura Geral</a>
+2. **Desenvolvedor frontend?** Veja a documentação dos <a href="{{ '/tecnico/modulos/' | relative_url }}">Módulos</a>
+3. **Trabalhando com backend?** Acesse a <a href="{{ '/tecnico/api/' | relative_url }}">API REST</a>
+4. **Consultando integrações?** Verifique as <a href="{{ '/tecnico/integracoes/' | relative_url }}">Integrações do Sistema</a>
 
 ## ℹ️ Sobre
 

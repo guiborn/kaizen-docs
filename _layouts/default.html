@@ -7,7 +7,7 @@
     <title>{% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}</title>
     <meta name="description" content="{% if page.excerpt %}{{ page.excerpt | strip_html | strip_newlines | truncate: 160 }}{% else %}{{ site.description }}{% endif %}">
 
-    <link rel="stylesheet" href="{{ '/kaizen/assets/css/style.css' | relative_url }}">
+    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
     <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
 
     {% seo %}
@@ -29,7 +29,7 @@
     <header class="site-header">
       <div class="wrapper">
         <div class="site-header-content">
-          <a class="site-title" href="{{ '/kaizen' | relative_url }}">
+          <a class="site-title" href="{{ '/' | relative_url }}">
             <span class="logo">📚</span> {{ site.title }}
           </a>
           <nav class="site-nav">

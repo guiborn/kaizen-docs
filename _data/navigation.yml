@@ -4,18 +4,18 @@
 - title: Documentação Técnica
   items:
     - title: Arquitetura Geral
-      url: /kaizen-docs/tecnico/arquitetura/
+      url: /tecnico/arquitetura/
     - title: Módulos de Gestão
-      url: /kaizen-docs/tecnico/modulos/
+      url: /tecnico/modulos/
     - title: Módulo AT
-      url: /kaizen-docs/tecnico/at/
+      url: /tecnico/at/
     - title: Módulo Cotações
-      url: /kaizen-docs/tecnico/cotacoes/
+      url: /tecnico/cotacoes/
     - title: Integrações
-      url: /kaizen-docs/tecnico/integracoes/
+      url: /tecnico/integracoes/
     - title: Perfis e Acesso
-      url: /kaizen-docs/tecnico/acesso/
+      url: /tecnico/acesso/
     - title: IA - Kai
-      url: /kaizen-docs/tecnico/ia/
+      url: /tecnico/ia/
     - title: Cloud Functions & API
-      url: /kaizen-docs/tecnico/api/
+      url: /tecnico/api/
