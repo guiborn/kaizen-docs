@@ -255,43 +255,217 @@ Body: { topicName: "pedidos_{clientId}_{branchId}", subscribe: true }
 
 ---
 
-## 5. Resumo das Integrações
+## 5. Prevision — Integração de Planejamento
 
-| Sistema | Tipo de Integração | Direção | Autenticação | Frequência |
-|---------|--------------------|---------|--------------|------------|
-| **Salesforce CRM** | REST API (via Cloud Functions) | Bidirecional | OAuth2 / JWT Bearer | 15 min (incremental) |
-| **Azure Synapse** | REST API (via Cloud Functions) | Leitura | Service Principal (Azure AD) | Diária / por demanda |
-| **Mega ERP** | REST API (via Cloud Functions) | Bidirecional | API Key / Basic Auth | Por demanda + diário (catálogo) |
-| **Firebase FCM** | SDK nativo Firebase | Saída | Firebase Admin SDK | Por evento |
-| **Firebase Auth** | SDK Firebase | Interno | Firebase JWT | Por sessão |
-| **Firebase Storage** | SDK Firebase | Bidirecional | Firebase Rules | Por upload/download |
+### 5.1 Visão Geral
+
+O **Prevision** ([Prevision.com.br](https://prevision.com.br)) é a plataforma de planejamento especializada que o Kaizen integra para importação de cronogramas, atividades, lotes, serviços, curvas S e análises de caminho crítico. Essa integração permite que obras gerenciadas em Prevision sincronizem automaticamente seus dados de planejamento para o Kaizen.
+
+**Pontos-chave:**
+- **Sincronização automática** de cronogramas via API GraphQL
+- **Bidirecional parcial:** Kaizen importa dados do Prevision; feedback pode ser enviado de volta
+- **Multi-tenant:** cada tenant pode ter seu próprio workspace no Prevision
+- **Dados primários:** Atividades, Lotes, Serviços, Curva S (S/B/D), Caminho Crítico, CFF (Cronograma Físico Financeiro)
 
 ---
 
-## 6. Considerações de Segurança
+### 5.2 Autenticação com Prevision
 
-### 6.1 Proxy Obrigatório via Cloud Functions
-Nenhuma credencial de sistema externo (Salesforce, Synapse, Mega ERP) é exposta no app Flutter. Todas as chamadas externas passam pelo proxy das Cloud Functions, que:
+O Kaizen autentica junto ao Prevision usando **Token Bearer**:
+
+```
+Cloud Function: syncPrevisionSchedules()
+      ↓
+Authorization: Bearer $PREVISION_API_TOKEN
+      ↓
+POST https://api.prevision.com.br/graphql
+      ↓
+Retorna: ActivitiesPage, LotsPage, ServicesPage, S-Curve, CriticalPath
+```
+
+**Armazenamento de Credenciais:**
+- Token API do Prevision armazenado em **variáveis de ambiente** do Firebase
+- Nunca exposto no código-fonte ou app Flutter
+- Rotação periódica de token conforme política do cliente
+
+---
+
+### 5.3 Campos de Vínculo
+
+Cada obra no Kaizen (`SiteModel`) inclui:
+
+```dart
+String? previsionProjectId;      // ID único do projeto no Prevision
+DateTime? lastPrevisionSync;     // Timestamp da última sinc bem-sucedida
+int? previsionScheduleVersion;   // Versão do cronograma importado
+```
+
+---
+
+### 5.4 Mecanismo de Sincronização
+
+**Fluxo Automático:**
+
+```
+Cloud Scheduler (diário)
+      ↓
+Cloud Function: syncPrevisionSchedules()
+      ↓
+Para cada obra com previsionProjectId válido:
+   - GraphQL Query ao Prevision com filtro LastModifiedDate > lastSync
+   - Mapeamento: PrevisionActivity → ActivityModel, etc.
+   - Firestore batch.set({ merge: true }) por atividade/lote/serviço
+   - Atualiza SiteModel.lastPrevisionSync = now()
+      ↓
+Idempotência garantida: N sincronizações com mesmos dados = sem duplicatas
+```
+
+**Sincronização por Demanda:**
+- Usuário com privilégio `physical` pode forçar sincronização manual
+- Útil se cronograma foi revisado significantly no Prevision e precisa atualizar rapidamente
+
+**Sincronização Completa (Fallback):**
+- Executada semanalmente ou se sincronização incremental falhar 3x
+- Recarrega todos os dados do Prevision para validação de integridade
+
+---
+
+### 5.5 Dados Sincronizados
+
+| Entidade | Mapeamento | Frequência |
+|----------|-----------|-----------|
+| **Activities** | `ActivityModel` (atividades do cronograma) | Diária (incremental) |
+| **Lots/Floors** | `LotModel` (lotes) | Diária (incremental) |
+| **Services** | `ServiceModel` (serviços) | Diária (incremental) |
+| **S-Curve** | `Curve` (basePoints, expectedPoints, realizedPoints) | Diária |
+| **Critical Path** | Array de IDs de atividades críticas | Diária |
+| **CFF** | `BudgetWeightModel` (detalhes de cronograma financeiro) | Semanal ou por demanda |
+
+**Exemplo de Atividade Sincronizada:**
+
+| Campo Prevision | Campo Kaizen | Tipo |
+|-----------------|------------|------|
+| `id` | `activityId` (doc ID no Firestore) | String |
+| `name` | `activityName` | String |
+| `service.id` | `service` (referência) | String (FK) |
+| `floor.id` | `lot` (referência) | String (FK) |
+| `startAt` | `dataInicio` | DateTime |
+| `endAt` | `dataFim` | DateTime |
+| `workDuration` | `duracao` | Number (dias) |
+| `cost` | `custo` | Number |
+| `withinPeriod.percentageCompleted` | `percentConcluido` | Double (0–1) |
+
+---
+
+### 5.6 GraphQL Queries
+
+O módulo Prevision do Kaizen executa várias consultas GraphQL:
+
+| Query | Propósito |
+|-------|-----------|
+| `readPrevisionActivitiesV2(projectId, startDate, endDate)` | Atividades por período |
+| `readPrevisionLots(projectId)` | Lista de lotes (com paginação) |
+| `readPrevisionServices(projectId)` | Lista de serviços |
+| `readPrevisionSCurve(projectId)` | Curva S (S/B/D) |
+| `readPrevisionCriticalPath(projectId)` | IDs de atividades críticas |
+| `readPrevisionCffTable(projectId, budgetReportId)` | CFF detalhada |
+| `readPrevisionBudgetWeights(budgetReportId)` | Pesos de orçamento ligando atividades a itens |
+
+---
+
+### 5.7 Integração na Pipeline de Planejamento
+
+Quando o usuário acessa **Gestão de Cronogramas** na obra:
+
+```
+1. SiteModel.previsionProjectId verificado
+   ↓
+2. Se presente: carrega ScheduleModel de Firestore (importado do Prevision)
+   ↓
+3. Exibe no Gantt, Curva S, Painel de Produção, etc.
+   ↓
+4. Usuário pode reprogramar no Kaizen (altera copy local)
+   ↓
+5. Próxima sincronização do Prevision atualiza dados originais
+      (merge: true garante que edições locais não sejam sobrescritas se campo não mudou no Prevision)
+```
+
+---
+
+### 5.8 Tratamento de Falhas
+
+Se `syncPrevisionSchedules()` falhar:
+
+| Cenário | Ação |
+|---------|------|
+| Timeout/indisponibilidade Prevision | Log de erro; aguarda próximo ciclo (sem retry imediato) |
+| Falha de parsing JSON | Cronograma existente preservado; alert ao admin |
+| Rate limit Prevision | Exponential backoff; retry em 5, 15, 30 min |
+| 3 falhas consecutivas | Alerta no app para admins de obra |
+
+---
+
+### 5.9 Cache e Performance
+
+- **Firestore:** dados do Prevision armazenados em collections `activities`, `lots`, `services` com campo `previsionSync: true` para identificar origem
+- **Hive (offline):** cache local de último snapshot sincronizado
+- **Cálculos (Curva S, CFF):** resultados cacheados com versão (`cffCalculatedAt`, `cffVersion`) para evitar reprocessamento
+
+**Limite de Paginação:** 50–100 registros por query para manter tamanho de payload baixo
+
+---
+
+### 5.10 Segurança
+
+- **Validação de Tenant:** Cloud Function valida que o `previsionProjectId` pertence ao tenant do usuário autenticado
+- **Permissões:** apenas usuários com privilégio `baseline_view` ou `physical` podem disparar sincronização ou editar cronogramas importados
+- **Auditoria:** todas as sincronizações são logadas com timestamp, tenantId, número de registros processados, erros (se houver)
+
+---
+
+## 6. Resumo das Integrações
+
+| Sistema | Tipo de Integração | Direção | Autenticação | Frequência | Módulo |
+|---------|--------------------|---------|--------------|-----------|--------|
+| **Prevision** | GraphQL API | Leitura | Bearer Token | Diária (incremental) | Planejamento |
+| **Salesforce CRM** | REST API (via Cloud Functions) | Bidirecional | OAuth2 / JWT Bearer | 15 min (incremental) | AT + Unidades |
+| **Azure Synapse** | REST API (via Cloud Functions) | Leitura | Service Principal (Azure AD) | Diária / por demanda | Custo |
+| **Mega ERP** | REST API (via Cloud Functions) | Bidirecional | API Key / Basic Auth | Por demanda + diário (catálogo) | Almoxarifado |
+| **Firebase FCM** | SDK nativo Firebase | Saída | Firebase Admin SDK | Por evento | Notificações |
+| **Firebase Auth** | SDK Firebase | Interno | Firebase JWT | Por sessão | Autenticação |
+| **Firebase Storage** | SDK Firebase | Bidirecional | Firebase Rules | Por upload/download | Fotos/Anexos |
+
+---
+
+## 7. Considerações de Segurança
+
+### 7.1 Proxy Obrigatório via Cloud Functions
+Nenhuma credencial de sistema externo (Prevision, Salesforce, Synapse, Mega ERP) é exposta no app Flutter. Todas as chamadas externas passam pelo proxy das Cloud Functions, que:
 - Valida a autenticação do usuário Kaizen (Firebase JWT)
 - Verifica suas permissões e filial
 - Realiza a chamada ao sistema externo com as credenciais do servidor
 - Retorna apenas os dados relevantes para aquele usuário
 
-### 6.2 Armazenamento de Credenciais
-- Todas as credenciais externas (client IDs, secrets, certificados, API keys) são armazenadas em **variáveis de ambiente** do Firebase Functions (`functions.config()` ou Secret Manager do GCP)
+### 7.2 Armazenamento de Credenciais
+- Todas as credenciais externas (client IDs, secrets, certificados, API keys, tokens) são armazenadas em **variáveis de ambiente** do Firebase Functions (`functions.config()` ou GCP Secret Manager)
 - **Nunca** embutidas no código-fonte ou no bundle do app Flutter
 - Rotacionadas periodicamente conforme política de segurança
+- Acesso restrito a Cloud Functions (não expostas a usuários)
 
-### 6.3 Validação de Tenant nas Integrações
+### 7.3 Validação de Tenant nas Integrações
 - Todas as Cloud Functions verificam o `clientId` do usuário autenticado antes de qualquer consulta
-- Consultas ao Salesforce são filtradas pela org do cliente (cada tenant pode ter sua própria Salesforce Org)
+- Consultas ao Prevision, Salesforce e Synapse são filtradas pela org/tenant do cliente
 - Dados de um tenant **nunca** são expostos a outro tenant
+- Isolamento garantido em nível de aplicação (antes de qualquer query externa)
 
-### 6.4 Auditoria de Chamadas Externas
+### 7.4 Auditoria de Chamadas Externas
 - Todas as chamadas às APIs externas são logadas no Cloud Logging do GCP
-- Logs incluem: timestamp, Cloud Function, tenantId, tipo de objeto, número de registros retornados
-- Alertas configuráveis para falhas consecutivas ou volumes anômalos
+- Logs incluem: timestamp, Cloud Function, tenantId, tipo de objeto, número de registros retornados, erros
+- Alertas configuráveis para:
+  - Falhas consecutivas na mesma integração
+  - Volumes anômalos de chamadas (detecção de abuso)
+  - Tentativas de acesso cross-tenant
 
 ---
 
-*Documento: Integrações com Sistemas Externos | Versão 1.0 | Kaizen Gerenciamento de Obras*
+*Documento: Integrações com Sistemas Externos | Versão 2.0 | Kaizen Gerenciamento de Obras — Março de 2026*

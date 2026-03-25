@@ -38,10 +38,10 @@ O sistema é **multi-tenant** (múltiplos clientes isolados na mesma infraestrut
 | Arquivo | Conteúdo |
 |---|---|
 | [01 — Arquitetura Geral](./01_arquitetura_geral.md) | Stack tecnológico, infra, multi-tenancy, offline, segurança |
-| [02 — Módulos Gestão de Obras](./02_modulos_gestao_obra.md) | Todos os módulos da plataforma de obras (~25 funcionalidades) |
+| [02 — Módulos Gestão de Obras](./02_modulos_gestao_obra.md) | **Reorganizado:** 8 categorias principais de módulos; primeiros passos em cada Uma; integração Prevision |
 | [03 — Módulo Assistência Técnica](./03_modulo_assistencia_tecnica.md) | AT: work orders, agendamentos, colaboradores, analytics |
-| [04 — Módulo Cotações](./04_modulo_cotacoes.md) | Mapas de cotação, estágios, integração com orçamento |
-| [05 — Integrações Externas](./05_integracoes.md) | Salesforce CRM, Azure Synapse, Mega ERP |
+| [04 — Módulo Cotações](./04_modulo_cotacoes.md) | Mapas de cotação, 4 estágios, integração com orçamento |
+| [05 — Integrações Externas](./05_integracoes.md) | **Novo:** Prevision (histórico, planejamento); Salesforce, Azure Synapse, Mega ERP, FCM |
 | [06 — Perfis e Controle de Acesso](./06_perfis_acesso.md) | Roles, privilege keys, controle por filial |
 | [07 — Inteligência Artificial (KAI)](./07_ia_kai.md) | Agentes KAI, RAG, análise de restrições e planos de ação |
 | [08 — Cloud Functions e Kaizen API](./08_cloud_functions_api.md) | Funções backend, triggers, notificações, API REST para Data Lake |
@@ -50,39 +50,69 @@ O sistema é **multi-tenant** (múltiplos clientes isolados na mesma infraestrut
 
 ## Resumo de Capacidades por Domínio
 
-### Planejamento de Obra
-- Cronograma com múltiplas versões (baseline, previsão, realizado)
-- Gantt interativo com filtros por criticidade, serviço e lote
-- Curva S automática (planejado vs realizado)
-- Medições diárias de produtividade e avanço físico
-- EAP completa (torres, pavimentos, lotes, serviços, atividades)
+### 🎯 Planejamento e Medições de Produtividade
+- **Planejamento Kaizen:** ciclos de produção por atividade (percentual, croqui, ciclo)
+- **Medições diárias** com registros de produção, mão de obra e problemas em tempo real
+- **Índice de Produtividade** automático e projeção de conclusão
+- **Dashboards de Produtividade:** análise por serviço, empreiteira, ou lote
 
-### Rotinas de Gestão Lean
-- Planejamento de médio prazo em quadro de restrições (look-ahead 8 semanas)
-- Planos de ação com Kanban, notificações push e relatório PDF
-- Estabilização básica com checklists de campo por torre/pavimento
-- Farol de contratações integrado ao cronograma
+### 📊 Planejamento: Cronograma e Controle de Custos
+- **Cronograma com múltiplas versões:** baseline, previsto, realizado
+- **Gantt interativo com reprogramação livre** e propagação de dependências
+- **Curva S automática** (Scheduled vs. Baseline vs. Done) acumulada por período
+- **Importação Prevision:** sincronização automática de cronogramas, atividades, lotes e serviços
+- **Histórico de cronogramas** com comparação entre versões
+- **Gestão de Equipes** com custom por hora e histograma de alocação
 
-### Qualidade
-- Fichas de Verificação de Serviço (FVS): criação, preenchimento, aprovação e PDF
-- Inspeções de estabilização Lean com histórico e comparativo anual
+### 📈 Controle: Medições Físicas e Produção
+- **Medições Físicas** contratuais com fluxo de aprovação
+- **Painel de Produção** em matriz (Monkey Chart) com status por célula
+- **Gestão de Equipes** e histograma de ocupação de recursos
+- **Planos de Ação** com Kanban, lista, dashboard KPI e notificações push
 
-### Custo e Suprimentos
-- Orçamento paramétrico vs realizado com integração ERP
-- Desvios categorizados (orçamento, custo unitário, engenharia, prazo, projeto)
-- Almoxarifado digital com pedidos e integração Mega ERP
-- Mapas de cotação com fluxo de 4 estágios
+### 🔧 Rotinas de Gestão Lean (Last Planner System / 6M)
+- **Quadro de Restrições** (lookahead 8 semanas) com análise 6M via KAI
+- **Planos de Ação** integrados com Kanban, notificações e relatórios
+- **Farol de Contratações** com SLA de compra e indicador de risco (verde/amarelo/vermelho)
+- **Estabilização Lean:** checklists 5S com scoring histórico (até 24 meses)
 
-### Controle de Unidades (Imobiliário)
-- Catálogo de unidades sincronizado do Salesforce
-- Gestão de personalização de unidades com checklist
-- Gerador de etiquetas QR Code (folha ou placa individual)
-- Rastreamento de inspeções finais e vistoria com cliente
+### ✅ Qualidade
+- **Fichas de Verificação de Serviço (FVS):** templates por tipo de serviço, fluxo aprovação, PDF
+- **Inspeção Final de Obra:** técnica (engenheiro) vs. cliente (assinatura e laudo)
+- **Inspeção Final da Qualidade:** checklist de materiais, acabamentos, sistemas
 
-### Assistência Técnica
-- Integração bidirecional com Salesforce (Work Orders, Cases, Service Appointments)
-- Agendamentos em tempo real com suporte offline
-- Analytics de desempenho por técnico, empreendimento e período
+### 💰 Controle de Custos e Orçamento
+- **Custo vs. Orçado vs. Comprometido vs. Realizado** com desvios categorizados (5 tipos)
+- **Versionamento de orçamento** com snapshots de alterações e fluxo de aprovação
+- **Integração Synapse:** custo realizado em tempo real do ERP
+- **Cotações integradas:** 4 estágios de coleta, análise e aprovação de propostas
+
+### 🏢 Controle de Unidades (Imobiliário)
+- **Ficha completa da unidade:** proprietário, status, histórico de mudanças
+- **Aba Personalização:** customizações solicitadas com status e prazo
+- **Aba Obra:** avanço físico por etapa com fotos de evidência
+- **Vistoria do Cliente:** com assinatura digital e geração de Laudo em PDF
+- **Inspeção Final:** técnica distinta da vistoria
+- **Gerador de Etiquetas QR Code:** folha (12 etiquetas) ou placa individual A4
+
+### 📦 Gestão de Materiais
+- **Almoxarifado Digital:** requisições, pedidos, saídas, kits, consulta de saldo, auditoria
+- **Integração Mega ERP:** catálogo de produtos, preço, fornecedor, unidade de medida
+- **Kits pré-montados:** agregação de itens por atividade (retirada parcial gera requisição)
+- **Controle de Ativos:** reserva de veículos com calendário (60 meses), custo, rateio
+
+### Integrações Externas
+- **Prevision:** sincronização automática (diária) de cronogramas, atividades, lotes, serviços, Curva S
+- **Salesforce:** Work Orders, Service Appointments, Cases, Assets (telemetria a cada 15 min)
+- **Azure Synapse:** custo realizado para orçamento, fallback de dados históricos
+- **Mega ERP:** catálogo de materiais, saldo de estoque, pedidos de compra
+- **Firebase FCM:** notificações push para pedidos de aprovação, planos, restrições, agendamentos
+
+### 🤖 Inteligência Artificial (KAI)
+- **Análise automática de restrições** com categorização 6M (Mão de Obra, Material, Máquina, Medição, Meio, Método)
+- **Sugestão de novas restrições** com base em cronograma
+- **Resumos de documentos** (FVS, planos de ação, relatórios) via LLM
+- **RAG por obra:** análise contextual de restrições históricas e soluções passadas
 
 ---
 
@@ -90,14 +120,14 @@ O sistema é **multi-tenant** (múltiplos clientes isolados na mesma infraestrut
 
 | Requisito | Detalhe |
 |---|---|
-| Sistemas de origem | Salesforce CRM (obrigatório para AT e Unidades); ERP Mega (opcional, para materiais); Azure Synapse (opcional, para BI de custo) |
-| Conectividade | Acesso HTTPS para infraestrutura de backend (Google Cloud); acesso à API REST do Salesforce |
-| Dispositivos | Qualquer browser moderno (Chrome, Edge, Safari); Android 9+ ou iOS 14+ para app nativo |
-| Dados exportáveis | Excel (.xlsx) para relatórios; PDF para FVS, planos de ação e etiquetas |
-| Autenticação | Autenticação por e-mail/senha ou SSO corporativo (para clientes enterprise) |
+| Sistemas de origem | **Prevision** (cronograma); Salesforce CRM (obrigatório para AT/Unidades); Mega ERP (opcional, materiais); Azure Synapse (opcional, BI custo) |
+| Conectividade | HTTPS para Google Cloud (backend); API REST Salesforce, Prevision, Synapse, Mega ERP |
+| Dispositivos | Browser moderno (Chrome, Edge, Safari); Android 9+ ou iOS 14+ para app nativo |
+| Dados exportáveis | Excel (.xlsx) para relatórios; PDF para FVS, planos, etiquetas, auditorias |
+| Autenticação | E-mail/senha ou SSO corporativo (Azure AD, Google Workspace para enterprise) |
 
 ---
 
 ## Contato Técnico
 
-Para dúvidas sobre integrações, SLA de API, limites de dados ou customizações, consulte a equipe técnica do Kaizen.
+Para dúvidas sobre integrações (Prevision, Salesforce, Synapse, Mega ERP), SLA de API, limites de dados, customizações ou implantação técnica, consulte a equipe técnica do Kaizen.
