@@ -110,11 +110,13 @@ body {
   &:hover {
     background-color: rgba(255, 255, 255, 0.1);
     text-decoration: none;
+    color: white;
   }
 
   &.active {
     background-color: rgba(255, 255, 255, 0.2);
     font-weight: 600;
+    color: white;
   }
 }
 

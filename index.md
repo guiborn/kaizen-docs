@@ -48,7 +48,7 @@ Nesta seção você encontra a documentação técnica completa sobre a arquitet
   </div>
   <div>
     <h3>🤖 Inteligência Artificial</h3>
-    <p><a href="{{ '/tecnico/ia/' | relative_url }}"><strong>IA Kai - Sistema de Sugestões</strong></a><br>
+    <p><a href="{{ '/tecnico/ia/' | relative_url }}"><strong>IA Kai - Inteligência Artificial Aplicada</strong></a><br>
     Módulo de inteligência artificial para sugestões, análises e automações.</p>
   </div>
   <div>
