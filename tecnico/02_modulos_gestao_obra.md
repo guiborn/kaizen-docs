@@ -16,7 +16,7 @@ toc: true
 | [1](#1-produtividade--planejamento-e-medições-kaizen) | **Produtividade — Planejamento e Medições Kaizen** | Planos de produção, registro diário de avanço, índice de produtividade |
 | [2](#2-planejamento-físico-financeiro) | **Planejamento Físico-Financeiro** | Macaquinho (visão matricial), Curva S, CFF, Gantt reprogramável, cronogramas, vinculação de orçamento |
 | [3](#3-controle-de-produção) | **Controle de Produção** | Medições físicas, painel de produção, equipes & histograma, planos de ação |
-| [4](#4-rotinas-de-gestão) | **Rotinas de Gestão** | Farol de contratações, quadro de restrições (6M/6WLA — Last Planner) |
+| [4](#4-rotinas-de-gestão) | **Rotinas de Gestão** | Quadro de restrições (6M/6WLA), Dashboard de restrições (análise multi-obra), Farol de contratações |
 | [5](#5-qualidade) | **Qualidade** | FVS, inspeção de obra, estabilização lean |
 | [6](#6-custo-e-contratos) | **Custo e Contratos** | Controle de custo, cotações, orçamento projetado |
 | [7](#7-controle-de-unidades) | **Controle de Unidades** | Vistorias, personalização, avanço físico por unidade |
@@ -723,6 +723,279 @@ Ao criar um processo, o usuário pode configurar um **alerta automático** que a
 | CSV de processos | Exportação filtrada dos processos visíveis na tela |
 
 **Chave de privilégio:** `supply_schedule` ou perfil admin
+
+---
+
+### 4.3 Dashboard de Restrições
+
+O **Dashboard de Restrições** é o painel centralizado de monitoramento e análise do **6-Week Lookahead (6WLA)** — o quadro de impedimentos que bloqueiam a execução das atividades planejadas. Complementa a tela de edição do Quadro de Restrições (4.1) fornecendo visualizações analíticas em tempo real: estatísticas por setor responsável, análise de responsáveis externos (fornecedores), distribuição por status e nível de escalonamento, além de métricas consolidadas por obra.
+
+O dashboard é organizado em **3 abas principais**: **Visão Geral** (Overview), **Listagem** (List) e **Kanban** (visual drag-and-drop), cada uma com sua própria lógica de filtragem e apresentação.
+
+#### 4.3.1 Barra de Filtros Globais
+
+Todos as três abas do dashboard compartilham uma **barra de filtros global** posicionada no topo:
+
+| Filtro | Tipo | Função |
+|--------|------|--------|
+| **Setor Responsável** | Dropdown | Filtra restrições por setor (Obra, Fornecedor, Projetos, Recursos Humanos, etc.) |
+| **Obra** | Dropdown | Seleciona a obra ativa para análise (multi-obra) |
+| **Janela de Conclusão** | Selector | Define a janela de tempo para considerar restrições concluídas: 7, 14, 30, 60 ou 90 dias (padrão: 30 dias) |
+| **Nível de Escalonamento** | Chips (N1–N4) | Filtra por nível de escalação. N1 excludo por padrão (custo otimizado); lock em N1 exige confirmação para incluir |
+
+**Comportamento:**
+- Os filtros aplicam-se **globalmente** a todas as abas (List, Kanban)
+- A **Visão Geral (Overview)** tem filtro local adicional de **Status** (ver seção 4.3.2)
+- Mudanças de filtro refletem imediatamente em todos os cards, gráficos e contadores
+- Restrições **arquivadas** (`isArchived: true`) são **sempre excluídas** de toda análise, independentemente de filtros
+
+**Privilege check:** O dropdown de obras exibe apenas obras acessíveis ao usuário conforme `BranchAccessService` (admin vê todas; usuários normais veem apenas sua obra)
+
+#### 4.3.2 Visão Geral (Overview Tab)
+
+A aba **Overview** exibe uma análise consolidada de restrições com painéis KPI e gráficos de distribuição. Inclui um **filtro local de status** (separado do controller global) para exploração granular.
+
+##### Filtro Local de Status
+
+Na parte superior da Overview aparecem 5 chips interativos (Material Design `FilterChip`):
+
+| Chip | Restrições Exibidas |
+|------|-------------------|
+| **Todos os Status** (padrão) | Todas sem restrição de status |
+| **Planejada** | Status = "Planejada" (não iniciada) |
+| **Em Execução** | Status = "Em Execução" (ativa) |
+| **Atrasada** | Status = "Atrasada" (vencida) |
+| **Concluída** | Status = "Concluída" (finalizada) |
+
+- Seleção exclusiva (um chip ativo por vez)
+- Cores codificadas de acordo com `lstRestrictionStatus` global
+- Aplicado **apenas ao conteúdo desta aba** (não afeta List ou Kanban)
+
+##### Seção de KPIs — Resumo Geral
+
+Card supremo com 4 estatísticas em tempo real (atualizadas a cada mudança de filtro):
+
+| Métrica | Cálculo | Contexto |
+|---------|---------|---------|
+| **Total** | Contagem de todas restrições filtradas (excl. arquivadas) | Baseline de volume |
+| **Abertas** | Status ∈ {Planejada, Em Execução, Atrasada} | Restrições ativas que carecem de atenção |
+| **Atrasadas** | Status = "Atrasada" | Risco imediato — requer ação urgente |
+| **Concluídas** | Status = "Concluída" (dentro da janela de conclusão configurada) | Métricas de resolução |
+
+Cada métrica exibe número absoluto + variação em relação ao período anterior (se histórico disponível).
+
+##### Gráficos de Distribuição
+
+Abaixo dos KPIs, uma série de barras horizontais agrupadas:
+
+**1. Restrições por Obra** — barra de contagens segmentada por nome da obra:
+
+```
+Obra A ████████ 24 restrições
+Obra B ██████ 18 restrições
+Obra C ████ 12 restrições
+```
+
+Útil para identificar qual obra concentra maior volume de impedimentos.
+
+**2. Restrições por Setor Responsável** — barras coloridas por setor (cores de `lstResponsibleSectorColors`):
+
+```
+Obra              ████████ 16
+Fornecedor        ██████ 12
+Projetos          ████ 8
+Recursos Humanos  ██ 4
+```
+
+Identifica qual departamento/categoria responde por mais bloqueadores.
+
+**3. Responsáveis Externos** — análise específica de restrições com **setor = "Fornecedor"**, agrupadas por nome do responsável:
+
+```
+Fornecedor A ████████ 8 restrições
+Fornecedor B ██████ 5 restrições
+Fornecedor C ██ 2 restrições
+```
+
+Permite priorizar negociação com fornecedores críticos.
+
+**4. Restrições por Status** — legend com contagem e cores de `lstRestrictionStatus`:
+
+```
+🟢 Concluída   42
+🟡 Em Execução 18
+🔴 Atrasada    7
+⚪ Planejada   15
+```
+
+Visão rápida da saúde geral do quadro.
+
+**5. Restrições por Categoria (6M)** — chips com ícones de categoria + barras:
+
+```
+Mão de obra    [ícone] █ 8 restrições
+Materiais      [ícone] █ 10 restrições
+Máquinas       [ícone] █ 5 restrições
+Métodos        [ícone] █ 12 restrições
+Meio Ambiente  [ícone] █ 3 restrições
+Medição        [ícone] █ 4 restrições
+```
+
+Identifica qual fator (6M) é raiz de mais problemas — útil para direcionar estratégias de melhoria.
+
+**6. Restrições por Nível de Escalonamento** — barras por nível:
+
+```
+N2 ████████ 24
+N3 ██████ 16
+N4 ██ 8
+```
+
+(N1 não exibido se `includeN1 = false`)
+
+**7. Índice de Atraso (Concluídas)** — progress circular:
+
+```
+Concluídas no prazo: ███████ 85%
+Concluídas atrasadas: 15%
+```
+
+Métrica de performance: qual % das restrições foi resolvido dentro do prazo de comprometimento.
+
+#### 4.3.3 Listagem (List Tab)
+
+Grade tabular de todas as restrições com suporte a **busca texto** e **filtros globais** aplicados.
+
+##### Colunas exibidas
+
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| **Obra** | string | Nome da obra |
+| **Serviço/Atividade** | string | Atividade da EAP afetada |
+| **Status** | badge colorido | Planejada / Em Execução / Atrasada / Concluída |
+| **Responsável** | chip | Departamento ou nome do responsável |
+| **Setor** | string | Setor responsável (Obra, Fornecedor, etc.) |
+| **Categoria 6M** | icon + label | Ícone de causa raiz |
+| **Nível** | chip | N1 / N2 / N3 / N4 |
+| **Data de Comprometimento** | date | Prazo acordado para resolução |
+| **Há X dias** | relative time badge | Dias desde criação (verde se concluída recentemente, vermelho se atrasada) |
+
+##### Interação
+
+- **Clique em linha:** abre detalhes da restrição no painel lateral ou página dedicada
+- **Busca por texto** (campo de pesquisa na AppBar): busca em descrição, serviço e responsável
+- **Ordenação:** multicritério por coluna (status, data de comprometimento, etc.)
+- **Seleção em lote:** checkboxes para exportação ou edição em massa
+
+#### 4.3.4 Kanban Tab
+
+Visualização em **cards por coluna de status** com suporte a **drag-and-drop** para transição de status:
+
+```
+┌──────────────┬──────────────┬──────────────┬──────────────┐
+│ Planejada    │ Em Execução  │ Atrasada     │ Concluída    │
+│ (15 cards)   │ (8 cards)    │ (3 cards)    │ (42 cards)   │
+├──────────────┼──────────────┼──────────────┼──────────────┤
+│ [REST-001]   │ [REST-003]   │ [REST-005]   │ [REST-007]   │
+│ Mão de obra  │ Materiais    │ Métodos      │ Máquinas     │
+│ Obra A       │ Obra B       │ Obra A       │ Obra B       │
+│ N2           │ N3           │ N2           │ N4           │
+│              │              │              │ há 2 dias    │
+└──────────────┴──────────────┴──────────────┴──────────────┘
+```
+
+##### Card de Restrição
+
+Cada card exibe:
+
+- **Título/ID da restrição**
+- **Obra e serviço** (desnormalizados)
+- **Ícone de categoria 6M** com cor
+- **Nivel de escalonamento** (chip)
+- **Data de comprometimento** (se próxima do vencimento, destaca em vermelho)
+- **Responsável** (chip/avatar)
+- **Badge de tempo desde criação** ou "há X dias" para concluídas (verde se recente, vermelho se atrasado)
+
+##### Funcionalidades
+
+- **Drag-and-drop:** arrastar card de uma coluna para outra **alterna o status** da restrição (sem salvar imediatamente; exibe confirmação)
+- **Clique no card:** abre sidebar ou página de detalhes
+- **Menu de contexto:** opções de editar, duplicar, compartilhar, converter em plano de ação
+- **Filtros globais aplicados:** colunas mostram apenas restrições que atendem aos filtros de setor, obra, escalonamento, etc.
+- **Reordenação dentro da coluna:** swipe ou drag vertical para reordenar (ordem salva por usuário, preferência local)
+
+#### 4.3.5 Modelo de Dados (`RestrictionModel`)
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `id` / doc ID | string | Salesforce WorkOrderId ou UUID interno se criado no módulo |
+| `tenantId` | string | Isolamento multi-tenant |
+| `siteId` | string | Obra associada |
+| `serviceName` | string | Nome da atividade/serviço afetado |
+| `description` | string | Descrição do bloqueador |
+| `responsible` | `Map<dynamic, dynamic>` | Crew member (name, email, role, phone, uid) |
+| `sector` | string | Setor responsável (Obra, Fornecedor, Projetos, etc.) — usado para identificar responsáveis externos |
+| `status` | string | Planejada / Em Execução / Atrasada / Concluída |
+| `categoryCode` | string | Categoria 6M (mao_de_obra, materiais, maquinas, metodos, meio_ambiente, medicao) |
+| `escalationLevel` | int | 1 (N1) / 2 (N2) / 3 (N3) / 4 (N4) |
+| `commitmentDate` | DateTime | Prazo acordado para resolução |
+| `createdAt` | DateTime | Timestamp de criação (Firestore) |
+| `completedAt` | DateTime | Timestamp de conclusão (se status = Concluída) |
+| `isArchived` | bool | Controle de restrições arquivadas (sempre excluídas de análises) |
+| `comments` | string | Histórico de comentários sobre a restrição |
+| `attachments` | List<String> | URLs de documentos/fotos anexadas |
+| `relatedPlans` | List<String> | IDs de planos de ação vinculados |
+
+#### 4.3.6 Ações e Integrações
+
+**Por Restrição:**
+- **Criar Plano de Ação:** gera um novo plano vinculado à restrição (rota para Controle de Produção)
+- **Compartilhar:** copia link deep-link ou envia por WhatsApp/e-mail
+- **Anexar:** upload de fotos, documentos ou croquis
+- **Editar:** modifica todos os campos (validações de privilégio por perfil)
+- **Duplicar:** cria cópia com mesmos dados (útil para restrições recorrentes)
+- **Arquivar:** marca `isArchived = true` (soft-delete; exclui de análises)
+
+**Análises Globais (KAI):**
+- **Relatório analítico 6M:** agente `kai-restriction-analyst` via Cloud Function analisa distribuição de categorias, identifica padrões e recomenda ações
+- **Sugestões automáticas:** agente `kai-suggestion` propõe novas restrições baseado em datas de início de atividades futuras sem restrições registradas
+- **Chat integrado:** usuário pode conversar com KAI para análises ad-hoc (ex.: "quais são as minhas restrições críticas por setor?")
+
+#### 4.3.7 Privilégios e Acesso
+
+| Privilégio | Ação | Nota |
+|------------|------|------|
+| `mid_term` (padrão) | Visualizar Overview, List, Kanban; editar status | Requer cronograma ativo |
+| `mid_term_manager` | Editar descrição, responsável, datas, categoria 6M; criar/deletar restrições | Gerentes |
+| Admin | Acesso irrestrito; editar para qualquer obra; gerenciar privilégios | Super-users |
+| `restrictions_view_only` | Apenas visualizar (somente leitura) | Stakeholders |
+
+**Branch Access:** O `BranchAccessService` filtra restrições por `siteId`:
+- **Admin/Manager:** vê dropdown de todas as obras; pode filtrar ou comparar multi-obra
+- **Usuário comum:** vê apenas sua obra (branch)
+
+#### 4.3.8 Performance e Otimizações
+
+- **N1 Exclusão por Padrão:** Query Firestore com `.where('escalationLevel', '>=', 2)` reduz volume inicial; toggle N1 refaz query
+- **Computed Aggregations:** KPIs (Total, Abertas, Atrasadas, Concluídas) calculados em memória conforme filtros mudam (não engatilham queries novas)
+- **Real-time Listen:** Overview, List e Kanban escutam mudanças via `snapshots()` com filtros aplicados; updates refletem em < 1s de latência
+- **Lazy Load (Kanban):** Cards renderizados sob demanda conforme scroll
+- **Caching de Cores:** `lstResponsibleSectorColors` e `lstRestrictionStatus` carregadas uma vez ao inicializar o controller
+
+#### 4.3.9 Detalhes: Sidebar/Página de Restrição
+
+Ao selecionar uma restrição (clique em List ou Kanban), abre um painel lateral (mobile) ou página dedicada exibindo:
+
+- **Cabeçalho:** ID, título, status com progresso visual
+- **Abas:**
+  - **Geral:** descrição, responsável, setor, categoria 6M, datas, nível
+  - **Histórico:** timeline de mudanças de status, comentários, uploads
+  - **Planos de Ação:** lista de planos vinculados com links para abri-los
+  - **Anexos:** fotos, croquis (viewer integrado)
+- **Campos editáveis:** conforme privilégio do usuário
+- **Botão de ação:** "Criar Plano", "Arquivar", "Duplicar", "KAI—Gerar Relatório"
+
+**Chave de privilégio:** `mid_term` (visualização) · `mid_term_manager` (edição)
 
 ---
 

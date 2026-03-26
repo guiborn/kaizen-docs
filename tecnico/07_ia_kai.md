@@ -17,9 +17,10 @@ toc: true
 5. [KAI — Relatório de Planejamento](#5-kai--relatório-de-planejamento)
 6. [KAI — Sugestão Inteligente de Restrições](#6-kai--sugestão-inteligente-de-restrições)
 7. [KAI — Identificação de Problemas](#7-kai--identificação-de-problemas)
-8. [Base de Conhecimento (RAG)](#8-base-de-conhecimento-rag)
-9. [Arquitetura dos Agentes KAI](#9-arquitetura-dos-agentes-kai)
-10. [Segurança e Privacidade](#10-segurança-e-privacidade)
+8. [KAI Chat](#8-kai-chat)
+9. [Base de Conhecimento (RAG)](#9-base-de-conhecimento-rag)
+10. [Arquitetura dos Agentes KAI](#10-arquitetura-dos-agentes-kai)
+11. [Segurança e Privacidade](#11-segurança-e-privacidade)
 
 ---
 
@@ -38,6 +39,7 @@ Os agentes KAI são implementados como **Cloud Functions** no backend do Kaizen 
 | Relatório de Planejamento | Visão analítica do cronograma para reuniões de produção |
 | Sugestão de Restrições | Identificação automática de impedimentos a partir do contexto da obra |
 | Identificação de Problemas | Diagnóstico de não conformidades e anomalias na execução |
+| KAI Chat | Perguntas e respostas contextuais sobre restrições e outros módulos |
 
 ---
 
@@ -52,6 +54,7 @@ O KAI opera através de modelos de linguagem especializados, cada um com prompt 
 | `kai-plan-analyst` | `generatePlanReport` | Análise do planejamento e cronograma |
 | `kai-suggestion` | `suggestRestrictions` | Sugestão automática de restrições a catalogar |
 | `kai-problems` | `identifyProblems` | Identificação de problemas na execução |
+| `kai-chat` | `kaiChat` | Chat contextual multiuso para perguntas operacionais e gerenciais |
 
 Todos os agentes compartilham a mesma camada de autenticação e seguem o mesmo padrão de invocação.
 
@@ -69,6 +72,12 @@ Gerar um **relatório gerencial de restrições de obra** com dois públicos sim
 
 O modelo recebe as restrições catalogadas no Quadro de Restrições da obra (com todos os campos estruturados) e produz uma análise orientada ao futuro — o que precisa ser desbloqueado e quando — evitando inventar dados ausentes.
 
+O agente agora opera em dois modos:
+- **Obra única:** relatório focado em uma obra, sem repetir o nome da obra em cada item.
+- **Multi-obra:** usado no Dashboard Gerencial de Restrições, com agrupamento por obra e identificação explícita da obra em itens críticos e ações priorizadas.
+
+Além disso, a resposta final é forçada a usar **linguagem executiva e operacional**, sem expor nomes técnicos de campos, flags ou parâmetros internos.
+
 **Campos analisados por restrição:**
 
 | Campo | Interpretação |
@@ -77,10 +86,17 @@ O modelo recebe as restrições catalogadas no Quadro de Restrições da obra (c
 | `type` | Categoria 6M (Mão de Obra, Materiais, Máquinas, Método, Medição, Meio Ambiente) |
 | `responsible` / `sector` | Identificação de sobrecarga por responsável ou setor |
 | `dueDate` / `isOverdue` | Alertas de vencimento e urgência |
+| `openDays` | Dias desde a abertura da restrição |
 | `timesRescheduled` | Détecção de problema sistêmico (reagendamentos ≥ 2) |
 | `hasCriticalActivities` | Impacto no caminho crítico do cronograma |
 | `linkedActivities[].isCritical` | Atividades específicas bloqueadas pelo nome |
+| `escalationLevel` | Nível de escalação gerencial da restrição |
+| `siteName` | Nome da obra quando a análise está em modo multi-obra |
 | `priority` / `risk` | Priorização cruzada de urgência vs. impacto |
+
+### 3.2.1 Persistência de criticidade
+
+Em telas que não carregam o cronograma completo, o sistema passa a utilizar um **snapshot persistido** no próprio objeto da restrição para informar se há impacto no caminho crítico e quais atividades relevantes estão vinculadas. Isso permite que o KAI multi-obra mantenha qualidade analítica mesmo fora do contexto do planejamento detalhado.
 
 ### 3.3 Estrutura do Relatório Gerado
 
@@ -89,11 +105,18 @@ O modelo recebe as restrições catalogadas no Quadro de Restrições da obra (c
 Indicadores-síntese: total aberto, vencidas, reagendadas 2+ vezes, impactando caminho crítico.
 Semáforo geral de saúde da obra.
 
+## 🏗️ Análise por Obra
+(apenas no modo multi-obra)
+Agrupa totais, vencimentos, impacto em caminho crítico e semáforo por obra.
+
 ## 🔴 Restrições Críticas Prioritárias
-(restrições com hasCriticalActivities, isOverdue ou timesRescheduled ≥ 2)
+(restrições com impacto crítico, vencidas ou reagendadas múltiplas vezes)
 
 ## 📊 Análise por Categoria (6M)
 Distribuição e tempo médio em aberto por categoria.
+
+## 🔺 Análise por Nível de Escalação
+Concentração de impedimentos por nível operacional, gerencial, diretoria e executivo.
 
 ## 👤 Responsáveis e Setores em Atenção
 Identificação de sobrecarga e gargalos por área.
@@ -108,8 +131,15 @@ Ordenadas por urgência + impacto no caminho crítico.
 ### 3.4 Onde aparece no app
 
 - Botão "Analisar com KAI" no Quadro de Restrições
+- Aba KAI do Dashboard Gerencial de Restrições (modo multi-obra)
 - Relatório gerado em markdown, renderizado inline na tela
 - Pode ser exportado ou compartilhado
+
+### 3.5 Regras de resposta
+
+- O KAI não deve mencionar nomes de campos como `hasCriticalActivities`, `isOverdue` ou `timesRescheduled` no texto final.
+- Quando uma seção obrigatória não tiver itens elegíveis, ele responde com uma frase curta e natural, em tom executivo.
+- Em modo multi-obra, o nome da obra aparece quando for relevante para diferenciar riscos, gargalos e ações.
 
 ---
 
@@ -210,9 +240,91 @@ Análise de anomalias na execução da obra: desvios de qualidade, não conformi
 
 ---
 
-## 9. Arquitetura dos Agentes KAI
+## 8. KAI Chat
 
-### 9.1 Fluxo de uma chamada KAI
+### 8.1 Objetivo
+
+O **KAI Chat** é a interface conversacional do Kaizen para perguntas e respostas contextuais sobre os dados da obra. Diferente dos relatórios fixos, ele permite exploração incremental: o usuário pergunta, recebe a resposta e aprofunda o tema em novas interações.
+
+### 8.2 Onde aparece no app
+
+- Aba **Chat KAI** no módulo de restrições
+- Aba **Chat KAI** no Dashboard Gerencial de Restrições
+- Estruturado para reutilização futura em outros contextos, como planos de ação, medições e inspeções
+
+### 8.3 Como funciona
+
+```text
+App Flutter
+  ↓ envia pergunta + histórico recente
+Cloud Function: kaiChat
+  ↓ valida autenticação Firebase
+  ↓ monta prompt de sistema conforme o contexto (restrições, ações, inspeções etc.)
+  ↓ injeta o contexto factual apenas no primeiro turno
+Modelo KAI Chat
+  ↓ responde com texto natural, objetivo e contextual
+App Flutter
+  ↓ renderiza a conversa e preserva o histórico local da sessão
+```
+
+### 8.4 Características do KAI Chat
+
+- **Contextual por módulo:** o prompt muda conforme o tipo de dado analisado
+- **Primeiro turno com contexto completo:** o app envia o conjunto resumido de dados apenas na primeira pergunta
+- **Turnos seguintes com histórico:** as próximas mensagens reutilizam o histórico recente sem reenviar todo o payload
+- **Resposta objetiva:** o modelo é configurado para respostas factuais, baseadas somente nos dados fornecidos
+- **Baixo ruído técnico:** ao citar itens específicos, o agente prioriza descrição, obra, responsável, prazo e impacto, evitando IDs internos sem necessidade
+
+### 8.5 Payload esperado
+
+```json
+{
+  "siteId": "multi_site",
+  "siteName": "Dashboard Multi-obra",
+  "contextType": "restrictions",
+  "context": { "restrictions": [] },
+  "question": "Quais obras concentram mais risco?",
+  "history": [
+    { "role": "user", "content": "..." },
+    { "role": "assistant", "content": "..." }
+  ]
+}
+```
+
+### 8.6 Casos de uso típicos
+
+- "Quais são as restrições mais críticas agora?"
+- "Qual obra concentra mais risco ao cronograma?"
+- "Quem está com maior carga de restrições vencidas?"
+- "Explique em termos executivos o cenário atual"
+
+### 8.7 Tratamento de timeout e indisponibilidade
+
+Se o barramento de IA retornar timeout ou indisponibilidade temporária, a Cloud Function responde com mensagem amigável para o app, permitindo que a interface mostre erro controlado sem quebrar a conversa.
+
+---
+
+## 9. Base de Conhecimento (RAG)
+
+O KAI também pode operar com base de conhecimento estruturada, usando recuperação de contexto relevante antes da geração da resposta. Esse mecanismo é aplicado quando a consulta depende de documentos, políticas ou conteúdos de referência além dos dados transacionais da obra.
+
+### 9.1 Objetivos do RAG
+
+- Responder perguntas com base em documentos corporativos e operacionais
+- Reduzir alucinação do modelo em temas normativos ou processuais
+- Permitir rastreabilidade da origem do contexto utilizado
+
+### 9.2 Cenários típicos
+
+- Perguntas sobre procedimentos internos
+- Busca por conteúdo técnico em documentações sincronizadas
+- Apoio a consultas operacionais que dependem de textos de referência
+
+---
+
+## 10. Arquitetura dos Agentes KAI
+
+### 10.1 Fluxo de uma chamada KAI
 
 ```
 App Flutter
@@ -229,6 +341,8 @@ App Flutter
   ↓ Renderiza relatório em markdown inline
 ```
 
+No caso do **KAI Chat**, o fluxo inclui também histórico recente da conversa e prompt especializado por contexto.
+
 ### 9.2 Parâmetros de Geração
 
 | Parâmetro | Valor padrão | Descrição |
@@ -238,14 +352,24 @@ App Flutter
 | `top_p` | 0.9 | Diversidade do sampling |
 | `stream` | false | Resposta completa (não streaming) |
 
-### 9.3 Tratamento de Erros
+### 10.2.1 Parâmetros típicos do KAI Chat
+
+| Parâmetro | Valor padrão | Descrição |
+|-----------|-------------|-----------|
+| `temperature` | 0.3 | Respostas mais estáveis e factuais |
+| `max_tokens` | 2048 | Limite de tokens por resposta de chat |
+| `top_p` | 0.9 | Diversidade controlada |
+| `stream` | false | Resposta completa |
+
+### 10.3 Tratamento de Erros
 
 - Resposta inválida do modelo → extração de JSON válido via regex fallback
 - Timeout → erro 504 retornado ao app com mensagem amigável
 - Token inválido → erro 401 antes de qualquer chamada ao modelo
 - Campos ausentes nos dados → o prompt instrui o modelo a omitir itens sem dados (nunca inventar)
+- Timeout do barramento no KAI Chat → retry automático único antes de devolver erro amigável
 
-### 9.4 Escalabilidade
+### 10.4 Escalabilidade
 
 - Cada Cloud Function KAI executa de forma independente (serverless auto-scaling)
 - Tempo de resposta típico: 5–15 segundos dependendo do volume de dados
@@ -254,9 +378,9 @@ App Flutter
 
 ---
 
-## 10. Segurança e Privacidade
+## 11. Segurança e Privacidade
 
-### 10.1 Autenticação obrigatória
+### 11.1 Autenticação obrigatória
 
 **Nenhuma chamada ao KAI é possível sem autenticação válida.** Cada Cloud Function valida o token antes de qualquer processamento:
 
@@ -267,21 +391,21 @@ async function requireAuth(req) {
 }
 ```
 
-### 10.2 Dados enviados ao modelo
+### 11.2 Dados enviados ao modelo
 
 - São enviados apenas os **dados estruturados e filtrados** necessários para a análise
 - Nenhuma credencial de usuário, token de autenticação ou dado sensível é transmitido ao modelo
-- O `clientId` e identificadores internos **não** aparecem no payload de IA
+- O `clientId` e identificadores internos **não** precisam aparecer no texto final da IA
 - Dados pessoais (nomes de responsáveis) são transmitidos somente quando diretamente relevantes para o relatório (ex.: "Responsável pela restrição: João Silva")
 
-### 10.3 Restrições de Origem (CORS)
+### 11.3 Restrições de Origem (CORS)
 
 Apenas as origens autorizadas do Kaizen (`kaizen-v3.web.app`, `localhost:5173`) podem chamar as Cloud Functions KAI — chamadas de origens desconhecidas são bloqueadas na camada de transporte.
 
-### 10.4 Sem armazenamento de prompts externos
+### 11.4 Sem armazenamento de prompts externos
 
 Os dados da obra enviados ao modelo não são armazenados fora do ambiente Kaizen além do processamento da requisição. O Firestore armazena apenas os dados originais e, se o usuário optar por salvar, o relatório gerado.
 
 ---
 
-*Documento: Inteligência Artificial KAI | Versão 1.0 | Kaizen Construction Management*
+*Documento: Inteligência Artificial KAI | Versão 1.1 | Kaizen Construction Management*
