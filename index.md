@@ -51,6 +51,11 @@ Nesta seção você encontra a documentação técnica completa sobre a arquitet
     <p><a href="{{ '/tecnico/api/' | relative_url }}"><strong>Cloud Functions e API REST</strong></a><br>
     Documentação técnica de Cloud Functions, endpoints REST, autenticação e status de APIs.</p>
   </div>
+  <div>
+    <h3>📋 Changelog</h3>
+    <p><a href="{{ '/tecnico/changelog/' | relative_url }}"><strong>Histórico de Versões</strong></a><br>
+    Registro completo de todas as versões, features, melhorias e correções do sistema Kaizen.</p>
+  </div>
 </div>
 
 ## 🚀 Começar
