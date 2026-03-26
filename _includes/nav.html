@@ -1,10 +1,22 @@
 {% if site.data.navigation %}
   <ul class="nav-list">
     {% for item in site.data.navigation %}
+      {% assign is_active = false %}
+      {% if item.url == '/' %}
+        {% if page.url == '/' %}
+          {% assign is_active = true %}
+        {% endif %}
+      {% elsif item.url == '/tecnico/' %}
+        {% if page.url == item.url or page.url contains '/tecnico/' %}
+          {% assign is_active = true %}
+        {% endif %}
+      {% elsif page.url == item.url %}
+        {% assign is_active = true %}
+      {% endif %}
       <li class="nav-item">
         <a 
           href="{{ item.url | relative_url }}" 
-          class="nav-link {% if page.url == item.url %}active{% endif %}"
+          class="nav-link {% if is_active %}active{% endif %}"
         >
           {{ item.title }}
         </a>

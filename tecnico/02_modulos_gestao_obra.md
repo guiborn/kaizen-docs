@@ -7,21 +7,21 @@ order: 2
 toc: true
 ---
 
-# Kaizen — Módulos de Gestão O Kaizen organiza a gestão de obras em **8 blocos principais**, cobrindo o ciclo completo da construção: planejamento, controle operacional, qualidade, custo e entrega. Módulos complementares ampliam a cobertura para demandas específicas.
+O Kaizen organiza a gestão de obras em **8 blocos principais**, cobrindo o ciclo completo da construção: planejamento, controle operacional, qualidade, custo e entrega. Módulos complementares ampliam a cobertura para demandas específicas.
 
-## Navegação Rápida
+## Sumário
 
 | # | Bloco | Funções Principais |
 |---|-------|--------------------|
-| [1](#1-produtividade--planejamento-e-medições-kaizen) | **Produtividade — Planejamento e Medições Kaizen** | Planos de produção, registro diário de avanço, índice de produtividade |
-| [2](#2-planejamento-físico-financeiro) | **Planejamento Físico-Financeiro** | Macaquinho (visão matricial), Curva S, CFF, Gantt reprogramável, cronogramas, vinculação de orçamento |
-| [3](#3-controle-de-produção) | **Controle de Produção** | Medições físicas, painel de produção, equipes & histograma, planos de ação |
-| [4](#4-rotinas-de-gestão) | **Rotinas de Gestão** | Quadro de restrições (6M/6WLA), Dashboard de restrições (análise multi-obra), Farol de contratações |
-| [5](#5-qualidade) | **Qualidade** | FVS, inspeção de obra, estabilização lean |
-| [6](#6-custo-e-contratos) | **Custo e Contratos** | Controle de custo, cotações, orçamento projetado |
-| [7](#7-controle-de-unidades) | **Controle de Unidades** | Vistorias, personalização, avanço físico por unidade |
-| [8](#8-almoxarifado-e-ativos) | **Almoxarifado e Ativos** | Almoxarifado digital, kits, reserva de veículos/ferramentas |
-| [—](#módulos-complementares) | *Módulos Complementares* | Kaizen Diário, Gestão da Estrutura, Histórico, Estatísticas, Dashboard |
+| 1 | [**Produtividade — Planejamento e Medições Kaizen**](#1-produtividade--planejamento-e-medições-kaizen) | Planos de produção, registro diário de avanço, índice de produtividade |
+| 2 | [**Planejamento Físico-Financeiro**](#2-planejamento-físico-financeiro) | Macaquinho (visão matricial), Curva S, CFF, Gantt reprogramável, cronogramas, vinculação de orçamento |
+| 3 | [**Controle de Produção**](#3-controle-de-produção) | Medições físicas, painel de produção, equipes e histograma, planos de ação |
+| 4 | [**Rotinas de Gestão**](#4-rotinas-de-gestão) | Quadro de restrições (6M/6WLA), dashboard de restrições, farol de contratações |
+| 5 | [**Qualidade**](#5-qualidade) | FVS, inspeção de obra, estabilização lean |
+| 6 | [**Custo e Contratos**](#6-custo-e-contratos) | Controle de custo, cotações, orçamento projetado |
+| 7 | [**Controle de Unidades**](#7-controle-de-unidades) | Vistorias, personalização, avanço físico por unidade |
+| 8 | [**Almoxarifado e Ativos**](#8-almoxarifado-e-ativos) | Almoxarifado digital, kits, reserva de veículos e ferramentas |
+| — | [*Módulos Complementares*](#módulos-complementares) | Kaizen Diário, Gestão da Estrutura, Histórico, Estatísticas, Dashboard |
 
 ---
 
@@ -60,7 +60,7 @@ O sistema calcula automaticamente o **Índice de Produtividade** (produção ÷ 
 
 ---
 
-[↑ Voltar ao topo](#navegação-rápida)
+[↑ Voltar ao topo](#sumário)
 
 ---
 
@@ -392,7 +392,7 @@ Gerenciamento do ciclo de vida dos cronogramas da obra: criação de novas vers�
 
 ---
 
-[↑ Voltar ao topo](#navegação-rápida)
+[↑ Voltar ao topo](#sumário)
 
 ---
 
@@ -586,7 +586,7 @@ Gestão de itens de ação com três modos de visualização:
 
 ---
 
-[↑ Voltar ao topo](#navegação-rápida)
+[↑ Voltar ao topo](#sumário)
 
 ---
 
@@ -999,7 +999,7 @@ Ao selecionar uma restrição (clique em List ou Kanban), abre um painel lateral
 
 ---
 
-[↑ Voltar ao topo](#navegação-rápida)
+[↑ Voltar ao topo](#sumário)
 
 ---
 
@@ -1209,7 +1209,7 @@ Inspeções vinculadas a Work Orders do Salesforce via `workOrderSfId`. O contro
 
 ---
 
-[↑ Voltar ao topo](#navegação-rápida)
+[↑ Voltar ao topo](#sumário)
 
 ---
 
@@ -1363,7 +1363,7 @@ Todo evento relevante é automaticamente registrado no log do mapa (`addLog()`):
 
 ---
 
-[↑ Voltar ao topo](#navegação-rápida)
+[↑ Voltar ao topo](#sumário)
 
 ---
 
@@ -1467,7 +1467,7 @@ Requisição de dados
 
 ---
 
-[↑ Voltar ao topo](#navegação-rápida)
+[↑ Voltar ao topo](#sumário)
 
 ---
 
@@ -1520,7 +1520,7 @@ Gestão da frota e ativos compartilhados da filial com calendário mensal de res
 
 ---
 
-[↑ Voltar ao topo](#navegação-rápida)
+[↑ Voltar ao topo](#sumário)
 
 ---
 
@@ -1576,7 +1576,7 @@ Suporte a acúmulo mensal e exportação via impressão do browser.
 
 ---
 
-[↑ Voltar ao topo](#navegação-rápida)
+[↑ Voltar ao topo](#sumário)
 
 ---
 

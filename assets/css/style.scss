@@ -102,6 +102,11 @@ body {
   display: flex;
   gap: 24px;
 
+  .nav-link,
+  .nav-link:visited {
+    color: #f8fafc;
+  }
+
   @media (max-width: 600px) {
     gap: 12px;
     font-size: 14px;
@@ -126,20 +131,23 @@ body {
 }
 
 .nav-link {
-  color: white;
+  color: #f8fafc;
   text-decoration: none;
   padding: 8px 12px;
   border-radius: 4px;
+  font-weight: 500;
+  background-color: rgba(255, 255, 255, 0.08);
   transition: all 0.3s ease;
 
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+  &:hover,
+  &:focus-visible {
+    background-color: rgba(255, 255, 255, 0.16);
     text-decoration: none;
     color: white;
   }
 
   &.active {
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.24);
     font-weight: 600;
     color: white;
   }
