@@ -5,18 +5,22 @@
       {% assign headingcontent = heading | split: '>' %}
       {% assign headingid = heading | split: 'id="' %}
       {% assign headingid = headingid[1] | split: '"' | first %}
-      {% assign headinglevel = heading | split: ' ' | first | replace: 'h2', '2' | replace: 'h3', '3' | replace: 'h4', '4' | replace: 'h5', '5' | replace: 'h6', '6' %}
+      
       {% if heading contains 'h2' %}
-        <li><a href="#{{ headingid }}">{{ headingcontent[1] | strip_html }}</a></li>
+        <li class="toc-h2"><a href="#{{ headingid }}">{{ headingcontent[1] | strip_html }}</a></li>
       {% elsif heading contains 'h3' %}
-        <li style="margin-left: 20px;"><a href="#{{ headingid }}">{{ headingcontent[1] | strip_html }}</a></li>
+        <li class="toc-h3"><a href="#{{ headingid }}">{{ headingcontent[1] | strip_html }}</a></li>
       {% elsif heading contains 'h4' %}
-        <li style="margin-left: 40px;"><a href="#{{ headingid }}">{{ headingcontent[1] | strip_html }}</a></li>
+        <li class="toc-h4"><a href="#{{ headingid }}">{{ headingcontent[1] | strip_html }}</a></li>
+      {% elsif heading contains 'h5' %}
+        <li class="toc-h5"><a href="#{{ headingid }}">{{ headingcontent[1] | strip_html }}</a></li>
+      {% elsif heading contains 'h6' %}
+        <li class="toc-h6"><a href="#{{ headingid }}">{{ headingcontent[1] | strip_html }}</a></li>
       {% endif %}
     {% endif %}
   {% endfor %}
 {% endcapture %}
 
-<ul>
+<ul class="toc-list">
 {{ toc }}
 </ul>

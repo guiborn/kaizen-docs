@@ -15,17 +15,21 @@ layout: default
     {% endif %}
   </header>
 
-  <div class="post-content">
-    {% if page.toc != false %}
-      <div class="toc-wrapper">
-        <h3>Índice</h3>
-        <nav class="toc">
-          {% include toc.html html=content %}
-        </nav>
-      </div>
-    {% endif %}
+  <div class="post-layout">
+    <div class="post-content">
+      {{ content }}
+    </div>
 
-    {{ content }}
+    {% if page.toc != false %}
+      <aside class="sidebar">
+        <div class="toc-wrapper">
+          <h3>Índice</h3>
+          <nav class="toc">
+            {% include toc.html html=content %}
+          </nav>
+        </div>
+      </aside>
+    {% endif %}
   </div>
 
   {% if page.tags %}

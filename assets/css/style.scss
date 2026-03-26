@@ -195,6 +195,24 @@ body {
   font-size: 14px;
 }
 
+// Post layout with sidebar
+.post-layout {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 32px;
+  align-items: start;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr 250px;
+    gap: 24px;
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
 .post-content {
   font-size: 16px;
   line-height: 1.7;
@@ -306,52 +324,138 @@ body {
   }
 }
 
-// TOC styles
+// TOC Sidebar
+.sidebar {
+  position: sticky;
+  top: 20px;
+  height: fit-content;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+
+  @media (max-width: 768px) {
+    position: relative;
+    top: 0;
+    height: auto;
+    max-height: none;
+  }
+}
+
+// TOC styles - Sidebar
 .toc-wrapper {
   background-color: $bg-light;
   border: 1px solid $border-light;
-  border-radius: 6px;
-  padding: 16px;
-  margin-bottom: 32px;
-  float: right;
-  max-width: 280px;
-  margin-left: 24px;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 0;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.02) 0%, rgba(139, 92, 246, 0.02) 100%);
 
   @media (max-width: 768px) {
-    float: none;
-    max-width: 100%;
-    margin-left: 0;
     margin-bottom: 24px;
   }
 
   h3 {
     color: $theme-purple-dark;
-    font-size: 16px;
+    font-size: 14px;
+    font-weight: 700;
     margin-top: 0;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
 }
 
 .toc {
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 13px;
+  line-height: 1.8;
 
-  ul {
+  .toc-list {
     list-style: none;
     padding-left: 0;
     margin: 0;
   }
 
   li {
-    margin-bottom: 6px;
+    margin-bottom: 0;
+    list-style: none;
   }
 
   a {
     color: $theme-purple;
     text-decoration: none;
+    display: block;
+    padding: 4px 0;
+    border-left: 2px solid transparent;
+    padding-left: 8px;
+    transition: all 0.2s ease;
 
     &:hover {
-      text-decoration: underline;
+      color: $theme-purple-dark;
+      border-left-color: $theme-purple;
+      padding-left: 12px;
+    }
+  }
+
+  // Nível 2 (H2) - Principal
+  .toc-h2 {
+    margin-bottom: 8px;
+    
+    a {
+      font-weight: 600;
+      color: $theme-purple-dark;
+      padding-left: 0;
+
+      &:hover {
+        padding-left: 4px;
+        color: $theme-purple;
+      }
+    }
+  }
+
+  // Nível 3 (H3) - Subtópico
+  .toc-h3 {
+    margin-bottom: 4px;
+    margin-left: 12px;
+
+    a {
+      font-weight: 500;
+      color: $theme-purple;
+      font-size: 12px;
+    }
+  }
+
+  // Nível 4 (H4) - Subsubtópico
+  .toc-h4 {
+    margin-bottom: 4px;
+    margin-left: 24px;
+
+    a {
+      font-weight: 400;
+      color: $text-dark;
+      font-size: 12px;
+    }
+  }
+
+  // Nível 5 (H5) - Detalhe
+  .toc-h5 {
+    margin-bottom: 2px;
+    margin-left: 36px;
+
+    a {
+      font-weight: 400;
+      color: $text-light;
+      font-size: 11px;
+    }
+  }
+
+  // Nível 6 (H6) - Detalhe fino
+  .toc-h6 {
+    margin-bottom: 2px;
+    margin-left: 48px;
+
+    a {
+      font-weight: 400;
+      color: $text-light;
+      font-size: 11px;
     }
   }
 }
