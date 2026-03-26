@@ -638,6 +638,112 @@ Identificada → Em Andamento → Removida
 
 ---
 
+### 4.1.1 Auto-Escalonment de Atrasos
+
+O **Auto-Escalonment** é um mecanismo automático de gestão de risco que incrementa o nível de escalonamento de uma restrição conforme ela permanece aberta e atrasada. Implementado exclusivamente no **Quadro de Restrições (MID-TERM)**, o recurso garante que restrições que extrapolam prazos recebam atenção progressiva, elevando sua visibilidade e urgência.
+
+#### Conceito e Motivação
+
+O nível de escalonamento de uma restrição (`escalationLevel`: N1, N2, N3 ou N4) representa o **grau de esforço e autoridade** necessário para resolvê-la:
+
+| Nível | Significado | Tipos de Responsáveis |
+|-------|-------------|----------------------|
+| **N1** | Gestor de frente / Engenheiro | Equipe operacional direta |
+| **N2** | Gerente de obra / Superintendente | Gestão de médio escalão |
+| **N3** | Diretor de engenharia / Comercial | Cúpula de obra |
+| **N4** | Presidente / C-level | Nível executivo |
+
+Tradicionalmente, o nível é atribuído manualmente durante a criação ou edição da restrição. Contudo, **restrições que transpõem o prazo comprometido sem resolução precisam de atenção elevada** — caso contrário, permanecem invisíveis no radar gerencial até se tornarem crises.
+
+O **Auto-Escalonment** automatiza essa elevação: a cada **reprogramação** de uma restrição (quando o usuário estende seu prazo de comprometimento), o nível sobe linearmente — **N1 → N2 → N3 → N4** — até atingir o máximo operacional (N4).
+
+#### Lógica de Ativação
+
+O mecanismo é acionado **ao carregar a lista de restrições** (telas MID-TERM e Activity List), não em tempo real. Funciona assim:
+
+1. **Verificação de Ativação:** Ao abrir a tela de restrições, atualização manual ou via sincronização Salesforce, o sistema verifica se a flag global `RestrictionModel.autoEscalateEnabled` está ativa (controlada pela administração — ver seção § 4.1.2)
+2. **Cálculo por Restrição:** Para cada restrição **não concluída** que com `dueDate` **menor que hoje**:
+   - Computa: `newLevel = (timesRescheduled + 1).clamp(1, 4)`
+   - Onde `timesRescheduled` = quantas vezes a restrição foi reprogramada desde a criação
+   - Cálculo garante que cada reprogramação sobe um nível (máximo N4)
+3. **Escrita Seletiva (Write-on-Read):** Se `newLevel > escalationLevel` (ou seja, se há escalação a fazer):
+   - A restrição é **atualizada no Firestore** com o novo `escalationLevel`
+   - Timestamp `escalationAutoUpdatedAt` é gravado para auditoria
+   - Operação é **idempotente** (múltiplas leituras não causam atualizações repetidas — só escreve se houver aumento)
+
+#### Impacto no Dashboard
+
+Com o auto-escalonment ativo, restrições atrasadas e repetidamente reprogramadas **subirão naturalmente para níveis mais altos** no dashboard. Isso causa:
+
+- **Gráfico "Restrições por Nível de Escalonamento" (§ 4.3.2):** Deslocamento de volume de N1→N2→N3, evidenciando restrições críticas
+- **Filtro de Nível (§ 4.3.1):** Usuários focados em N3/N4 verão restrições antigas reaparecerem após as reprogramações as elevarem
+- **Métricas de KPI:** Contadores de restrições abertas podem permanecer estáveis em volume, mas o **mix de níveis muda**
+
+#### Configuração e Administração
+
+O auto-escalonment é gerenciado pela **configuração global "Escalamento Automático de Atrasos"**, acessível apenas para **usuários administradores** na aba **"Configurações Globais"** da tela de **Configurações da Empresa** (`DefaultView`).
+
+**Localização no app:**
+```
+Administração (DefaultView) → Aba "Configurações Globais"
+  → Seção "Restrições"
+    → Toggle "Escalamento Automático de Atrasos"
+```
+
+**Comportamento do toggle:**
+- **Ligado (ON):** Auto-escalonment ativo — restrições atrasadas sobem de nível a cada reprogramação
+- **Desligado (OFF):** Auto-escalonment desativo — níveis permanecem conforme definido manualmente (comportamento padrão anterior)
+
+A configuração é **per-tenant** (armazenada em `{activeClientString}/settings/main`), permitindo que cada cliente configure independentemente conforme sua política de gestão de risco.
+
+**Descrição de ajuda (no toggle):**
+> *"Restrições em atraso sobem de nível a cada reprogramação: N1→N2→N3→N4 (máx. N4). Aplicado ao carregar a lista de restrições."*
+
+#### Auditoria e Histórico
+
+As atualizações automáticas de nível são **rastreadas** via:
+
+- **Campo `escalationAutoUpdatedAt`:** Timestamp (server time) da última vez que o nível foi auto-atualizado
+- **Workflow logs:** Cada escalamento automático é registrado em `workflow_logs` para auditoria completa (quem atualizou: "sistema"; quando; de qual nível para qual)
+
+#### Exemplo Prático
+
+```
+Restrição: "Material de acabamento não chegou"
+Criação: 01/fev — N1 (atribuído a engenheiro
+Prazo: 07/fev
+
+08/fev (vencida): Sistema detecta → não faz nada (ainda não é reprogramação)
+              Auto-escalonment OFF ou feature não ativa
+
+10/fev: Engenheiro reprogram para 15/fev → timesRescheduled = 1
+       Se auto-escalonment ON: level sobe N1 → N2
+       escalationAutoUpdatedAt = "10/fev 14:15"
+
+16/fev: Ainda sem material, reprogram para 20/fev → timesRescheduled = 2
+        Auto-escalonment ON: level sobe N2 → N3
+        escalationAutoUpdatedAt = "16/fev 09:30"
+
+21/fev: Terceira reprogramação para 27/fev → timesRescheduled = 3
+        Auto-escalonment ON: level sobe N3 → N4
+        escalationAutoUpdatedAt = "21/fev 11:00"
+        Agora é N4 — Director/C-level é notificado
+
+25/fev: Material chegou, restrição encerrada
+        Nível permanece N4 (não desce) — histórico preservado
+```
+
+#### Considerações de Design
+
+1. **Apenas escalação para cima:** O nível nunca desce — uma restrição que foi escalada para N4 permanece N4 mesmo que eventualmente seja resolvida. Isso preserva a "memória" do problema.
+2. **Idempotência:** Write-on-read garante que múltiplas leituras não causam atualizações redundantes — só escreve se há aumento a fazer.
+3. **Sem limite de reprogramações:** Tecnicamente, `timesRescheduled` pode crescer indefinidamente, mas o `clamp(1, 4)` garante que mesmo com 10+ reprogramações, o nível máximo seja N4.
+4. **Independente de responsável:** A elevação é automática, não vinculada a quem é responsável — garante que restrições "abandonadas" não caiam pelo crack.
+
+**Chave de privilégio:** Visualização: `mid_term` · Configuração: admin only
+
+---
+
 ### 4.2 Farol de Contratações
 
 O **Farol de Contratações** é o módulo de gestão do cronograma de suprimentos. Seu objetivo central é garantir que nenhuma atividade do cronograma de obra seja paralisada por falta de material ou serviço contratado a tempo. O módulo usa um semáforo visual (🟢🟡🔴) para sinalizar o risco de cada processo de compra em relação às datas do cronograma físico.
@@ -749,6 +855,8 @@ Todos as três abas do dashboard compartilham uma **barra de filtros global** po
 - Mudanças de filtro refletem imediatamente em todos os cards, gráficos e contadores
 - Restrições **arquivadas** (`isArchived: true`) são **sempre excluídas** de toda análise, independentemente de filtros
 
+**Auto-Escalonment (Feature):** Se ativo (§ 4.1.1), restrições atrasadas e reprogramadas terão seus níveis automaticamente elevados ao carregar a lista. O filtro de nível refletirá essa mudança — restrições antigas podem aparecer em N3/N4 se tiverem sido reprogramadas múltiplas vezes.
+
 **Privilege check:** O dropdown de obras exibe apenas obras acessíveis ao usuário conforme `BranchAccessService` (admin vê todas; usuários normais veem apenas sua obra)
 
 #### 4.3.2 Visão Geral (Overview Tab)
@@ -846,8 +954,10 @@ Identifica qual fator (6M) é raiz de mais problemas — útil para direcionar e
 **6. Restrições por Nível de Escalonamento** — barras por nível:
 
 ```
-N2 ████████ 24
-N3 ██████ 16
+N1 ██ 6 (raramente visível com auto-escalonment ativo — restr. novas ou resolvidas rapidamente)
+N2 ████████ 24 (restrições com 1–2 reprogramações)
+N3 ██████ 16 (restrições com 2–3 reprogramações)
+N4 ████ 10 (restrições com 3+ reprogramações — maior risco)
 N4 ██ 8
 ```
 
