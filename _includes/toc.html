@@ -1,22 +1,36 @@
 {% capture toc %}
-  {% assign headings = html | split: '<h' %}
+  {% assign headings = include.html | split: '<h' %}
   {% for heading in headings %}
-    {% if heading contains 'id=' %}
-      {% assign headingcontent = heading | split: '>' %}
-      {% assign headingid = heading | split: 'id="' %}
-      {% assign headingid = headingid[1] | split: '"' | first %}
-      
-      {% if heading contains 'h2' %}
-        <li class="toc-h2"><a href="#{{ headingid }}">{{ headingcontent[1] | strip_html }}</a></li>
-      {% elsif heading contains 'h3' %}
-        <li class="toc-h3"><a href="#{{ headingid }}">{{ headingcontent[1] | strip_html }}</a></li>
-      {% elsif heading contains 'h4' %}
-        <li class="toc-h4"><a href="#{{ headingid }}">{{ headingcontent[1] | strip_html }}</a></li>
-      {% elsif heading contains 'h5' %}
-        <li class="toc-h5"><a href="#{{ headingid }}">{{ headingcontent[1] | strip_html }}</a></li>
-      {% elsif heading contains 'h6' %}
-        <li class="toc-h6"><a href="#{{ headingid }}">{{ headingcontent[1] | strip_html }}</a></li>
-      {% endif %}
+    {% if heading contains '2 id' %}
+      {% assign tmp = heading | split: 'id="' %}
+      {% assign headingid = tmp[1] | split: '"' | first %}
+      {% assign tmp2 = heading | split: '>' %}
+      {% assign headingvalue = tmp2[1] | split: '</h2' | first | strip_html %}
+      {% unless headingvalue == '' %}<li class="toc-h2"><a href="#{{ headingid }}">{{ headingvalue }}</a></li>{% endunless %}
+    {% elsif heading contains '3 id' %}
+      {% assign tmp = heading | split: 'id="' %}
+      {% assign headingid = tmp[1] | split: '"' | first %}
+      {% assign tmp2 = heading | split: '>' %}
+      {% assign headingvalue = tmp2[1] | split: '</h3' | first | strip_html %}
+      {% unless headingvalue == '' %}<li class="toc-h3"><a href="#{{ headingid }}">{{ headingvalue }}</a></li>{% endunless %}
+    {% elsif heading contains '4 id' %}
+      {% assign tmp = heading | split: 'id="' %}
+      {% assign headingid = tmp[1] | split: '"' | first %}
+      {% assign tmp2 = heading | split: '>' %}
+      {% assign headingvalue = tmp2[1] | split: '</h4' | first | strip_html %}
+      {% unless headingvalue == '' %}<li class="toc-h4"><a href="#{{ headingid }}">{{ headingvalue }}</a></li>{% endunless %}
+    {% elsif heading contains '5 id' %}
+      {% assign tmp = heading | split: 'id="' %}
+      {% assign headingid = tmp[1] | split: '"' | first %}
+      {% assign tmp2 = heading | split: '>' %}
+      {% assign headingvalue = tmp2[1] | split: '</h5' | first | strip_html %}
+      {% unless headingvalue == '' %}<li class="toc-h5"><a href="#{{ headingid }}">{{ headingvalue }}</a></li>{% endunless %}
+    {% elsif heading contains '6 id' %}
+      {% assign tmp = heading | split: 'id="' %}
+      {% assign headingid = tmp[1] | split: '"' | first %}
+      {% assign tmp2 = heading | split: '>' %}
+      {% assign headingvalue = tmp2[1] | split: '</h6' | first | strip_html %}
+      {% unless headingvalue == '' %}<li class="toc-h6"><a href="#{{ headingid }}">{{ headingvalue }}</a></li>{% endunless %}
     {% endif %}
   {% endfor %}
 {% endcapture %}
