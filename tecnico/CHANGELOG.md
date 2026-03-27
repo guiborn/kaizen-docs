@@ -12,6 +12,49 @@ Histórico de alterações e melhorias do sistema Kaizen.
 Este documento registra todas as versões e mudanças implementadas no sistema Kaizen, incluindo novos recursos, melhorias e correção de bugs.
 
 ---
+## Versão 3.6.9
+*26/03/2026*
+
+### 1. Inspeção Final da Qualidade (IFQ)
+- **1.1.** Correção de Bugs
+- **1.2.** Integração Salesforce
+
+### 2. Farol de Contratações
+- **2.1.** Correção de Bugs
+
+### 3. Dashboard Gerencial de Restrições
+- **3.1.** Auto-escalonamento por prazo determinado
+- **3.2.** Filtros múltiplos
+
+### 4. KAI
+- **4.1.** Melhorias na análise de restrições
+
+### 5. Controle de Custos
+- **5.1.** Correção de Bugs
+- **5.2.** Data base para estoque com parceiros
+
+---
+
+## Versão 3.6.8
+*25/03/2026*
+
+### 1. Inspeção Final da Qualidade (IFQ)
+- **1.1.** Integração Salesforce
+- **1.2.** Melhorias na UX da criação de máscaras e gestão de pendências
+- **1.3.** Mini Dash por inspeção
+
+### 2. Farol de Contratações
+- **2.1.** Correção de Bugs
+
+### 3. Dashboard Gerencial de Restrições
+- **3.1.** Desenvolvimento
+
+### 4. KAI
+- **4.1.** Melhorias no KAI Restriction Analyst
+- **4.2.** Lançamento do KAI Chat
+- **4.3.** Concepção do KAI 360
+
+---
 
 ## Versão 3.6.8
 
