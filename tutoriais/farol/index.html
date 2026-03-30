@@ -174,7 +174,7 @@ code { font-family:'JetBrains Mono',monospace; font-size:12px; background:var(--
     </div>
     
 <div class="nav-group"><div class="nav-group-label">Rotinas de Gestão</div>
-<a href="../farol/index.html" class="nav-link active"><span class="nav-icon">🚦</span> Farol de Contratações <span class="nav-badge">5 passos</span></a>
+<a href="../farol/index.html" class="nav-link active"><span class="nav-icon">🚦</span> Farol de Contratações <span class="nav-badge">5 abas</span></a>
 <a href="../planos/index.html" class="nav-link"><span class="nav-icon">📌</span> Planos de Ação <span class="nav-badge">6 passos</span></a>
 <a href="../restricoes/index.html" class="nav-link"><span class="nav-icon">🚧</span> Quadro de Restrições <span class="nav-badge">5 passos</span></a>
 </div>
@@ -212,96 +212,313 @@ code { font-family:'JetBrains Mono',monospace; font-size:12px; background:var(--
   </div>
   <div class="content">
 
+<style>
+/* ── FAROL-SPECIFIC EXTRAS ── */
+.rail-demo { display:flex; gap:0; border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-top:14px; }
+.rail-sidebar { width:56px; background:#1a1a2e; display:flex; flex-direction:column; align-items:center; padding:10px 0; gap:6px; flex-shrink:0; }
+.rail-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:17px; cursor:default; transition:.12s; }
+.rail-icon.active { background:rgba(255,255,255,0.15); }
+.rail-icon:not(.active) { opacity:.55; }
+.rail-content { flex:1; background:var(--surface); padding:12px 14px; display:flex; flex-direction:column; gap:6px; }
+.rail-content-title { font-size:13px; font-weight:700; color:var(--text-mid); }
+.rail-content-desc { font-size:12px; color:var(--text-muted); line-height:1.5; }
+
+.dialog-demo { border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-top:14px; }
+.dialog-header { background:#f5f5f7; border-bottom:1px solid var(--border); padding:10px 14px; display:flex; align-items:center; gap:10px; }
+.dialog-avatar { width:36px; height:36px; border-radius:50%; background:var(--purple-light); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+.dialog-header-info { flex:1; }
+.dialog-header-info strong { font-size:14px; font-weight:700; color:#1a1a2e; display:block; }
+.dialog-header-info span { font-size:11px; color:var(--text-muted); }
+.dialog-header-actions { display:flex; gap:4px; }
+.dialog-action-btn { width:30px; height:30px; border-radius:6px; background:var(--purple-light); display:flex; align-items:center; justify-content:center; font-size:13px; border:1px solid #ddd6fe; cursor:default; }
+.dialog-tabs { display:flex; border-bottom:1px solid var(--border); background:white; }
+.dialog-tab { padding:8px 14px; font-size:12.5px; font-weight:500; color:var(--text-muted); cursor:default; border-bottom:2px solid transparent; }
+.dialog-tab.active { color:var(--purple); border-bottom-color:var(--purple); font-weight:700; }
+.dialog-body { background:white; padding:12px 14px; font-size:13px; color:var(--text-mid); line-height:1.6; }
+
+.toolbar-demo { background:#1a1a2e; border-radius:10px; padding:8px 12px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:12px; }
+.toolbar-demo-btn { background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); color:white; font-size:12px; padding:5px 10px; border-radius:6px; display:inline-flex; align-items:center; gap:5px; cursor:default; }
+.toolbar-demo-icon { width:28px; height:28px; background:rgba(255,255,255,0.12); border-radius:6px; display:inline-flex; align-items:center; justify-content:center; font-size:13px; cursor:default; }
+.toolbar-demo-title { font-size:13px; font-weight:700; color:white; flex:1; }
+
+.matrix-demo { border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-top:12px; }
+.matrix-row { display:flex; border-bottom:1px solid var(--border); }
+.matrix-row:last-child { border-bottom:none; }
+.matrix-cell-label { width:180px; flex-shrink:0; padding:8px 10px; font-size:12.5px; font-weight:600; color:var(--text-mid); background:var(--surface); border-right:1px solid var(--border); }
+.matrix-cell { flex:1; padding:6px 8px; font-size:11.5px; text-align:center; font-weight:600; }
+.mc-green { background:#dcfce7; color:#166534; }
+.mc-amber { background:#fef9c3; color:#854d0e; }
+.mc-red { background:#fee2e2; color:#991b1b; }
+.mc-gray { background:#f3f4f6; color:#6b7280; }
+.mc-head { background:var(--surface); font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; padding:6px 8px; }
+.matrix-header .matrix-cell-label { background:var(--surface); }
+</style>
+
 <div class="tutorial-header">
   <div class="module-tag tag-amber">🚦 Rotinas de Gestão</div>
   <h1 class="tutorial-title">Farol de Contratações</h1>
-  <p class="tutorial-desc">Acompanhe o cronograma de suprimentos com semáforo visual de risco. Saiba quando acionar fornecedores antes que o prazo vire um problema na obra.</p>
+  <p class="tutorial-desc">Monitore o status de contratação de materiais e serviços com semáforo visual de risco. Três visões complementares — matriz de farol, lista de processos e grade detalhada — para você nunca perder um prazo.</p>
   <div class="tutorial-meta">
-    <div class="meta-item">⏱ <strong>~10 min</strong></div>
+    <div class="meta-item">⏱ <strong>~12 min</strong></div>
     <div class="meta-item">🔑 <span class="meta-pill">supply_schedule</span></div>
     <div class="meta-item">👤 Gestor de Suprimentos</div>
   </div>
 </div>
+
 <div class="steps-container">
 
+  <!-- STEP 1 -->
   <div class="step-block">
     <div class="step-line"></div>
     <div class="step-num-col"><div class="step-circle">1</div></div>
     <div class="step-body">
-      <div class="step-head"><div class="step-title">Acesse o Farol de Contratações</div><div class="step-time">~1 min</div></div>
-      <p class="step-text">No menu lateral, vá em <strong>Rotinas de Gestão → Farol de Contratações</strong>. A tela abre com a matriz de itens × fornecedores da obra ativa.</p>
-      <ul class="sub-steps">
-        <li>Confirme que a <strong>filial correta</strong> está selecionada no dropdown do cabeçalho.</li>
-        <li>A obra ativa aparece no título. Para trocar, use o seletor de obra.</li>
-      </ul>
-      <div class="screenshot screenshot-tall"><div class="screenshot-tag">TELA-01</div><div class="screenshot-icon">🖥️</div><div class="screenshot-label">Tela inicial — Farol de Contratações com a matriz visível</div><div class="screenshot-hint">Inserir print mostrando a matriz e o menu lateral destacado</div></div>
+      <div class="step-head"><div class="step-title">Entenda a estrutura da tela</div><div class="step-time">~2 min</div></div>
+      <p class="step-text">O Farol de Contratações usa um <strong>menu lateral (NavigationRail)</strong> com três abas principais. Clique no ícone para navegar; passe o mouse sobre o ícone para ver o nome da aba.</p>
+
+      <div class="rail-demo">
+        <div class="rail-sidebar">
+          <div class="rail-icon active">📋</div>
+          <div class="rail-icon">▶▶</div>
+          <div class="rail-icon">⊞</div>
+        </div>
+        <div class="rail-content">
+          <div class="rail-content-title">Abas disponíveis</div>
+          <ul class="sub-steps" style="margin-top:4px;">
+            <li><strong>Farol de Contratações</strong> — matriz de itens × obras em semáforo visual</li>
+            <li><strong>Acompanhamento</strong> — lista de processos em formato de cartões expansíveis</li>
+            <li><strong>Lista de Processos</strong> — grade tabular com filtro, ordenação e exportação</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="step-text" style="margin-top:14px;">Na <strong>barra superior (AppBar)</strong> você encontra ações globais do módulo:</p>
+      <div class="mini-table-wrap" style="margin-top:8px;"><table class="mini-table">
+        <thead><tr><th>Ícone</th><th>O que faz</th></tr></thead>
+        <tbody>
+          <tr><td>🔔</td><td><strong>Alertas de contratação</strong> — lista alertas pendentes e enviados (últimos 30 dias) para uma obra selecionada</td></tr>
+          <tr><td>🔍</td><td><strong>Filtros</strong> — abre o painel de filtros globais (status, item, responsável, setor); badge vermelho indica filtro ativo</td></tr>
+          <tr><td>🏦</td><td><strong>Sincronização</strong> — abre o painel de sincronização com o cronograma</td></tr>
+          <tr><td>⚙️</td><td><strong>Configurações</strong> — visível apenas para administradores; ajusta buffers e flags</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="callout callout-tip"><span class="callout-icon">💡</span><div class="callout-text"><strong>Tela cheia e expansão do menu:</strong> use o botão de tela cheia no topo do rail para maximizar a área de trabalho. Em telas largas, o botão de seta expande o rail mostrando os rótulos das abas.</div></div>
+
+      <div class="screenshot screenshot-tall"><div class="screenshot-tag">TELA-01</div><div class="screenshot-icon">🖥️</div><div class="screenshot-label">Tela principal — NavigationRail com as três abas e AppBar com ações globais</div><div class="screenshot-hint">Inserir print com rail lateral e AppBar visíveis</div></div>
     </div>
   </div>
 
+  <!-- STEP 2 -->
   <div class="step-block">
     <div class="step-line"></div>
     <div class="step-num-col"><div class="step-circle">2</div></div>
     <div class="step-body">
-      <div class="step-head"><div class="step-title">Cadastre um Item de Suprimento</div><div class="step-time">~3 min</div></div>
-      <p class="step-text">Clique em <strong>+ Novo Item</strong> e preencha:</p>
-      <div class="mini-table-wrap"><table class="mini-table">
-        <thead><tr><th>Campo</th><th>Obrig.?</th><th>O que preencher</th></tr></thead>
-        <tbody>
-          <tr><td><strong>Nome do item</strong></td><td><span class="field-req">Sim</span></td><td>Ex.: Cimento CP-II, Esquadrias Alumínio</td></tr>
-          <tr><td><strong>Categoria</strong></td><td><span class="field-req">Sim</span></td><td>Grupo de insumo (estrutura, acabamento…)</td></tr>
-          <tr><td><strong>Fornecedor</strong></td><td><span class="field-req">Sim</span></td><td>Selecione da lista cadastrada</td></tr>
-          <tr><td><strong>SLA padrão (dias)</strong></td><td><span class="field-req">Sim</span></td><td>Prazo de entrega habitual do fornecedor</td></tr>
-          <tr><td><strong>Margem de segurança</strong></td><td><span class="field-opt">Opt.</span></td><td>Folga extra para imprevistos</td></tr>
-          <tr><td><strong>Estoque mínimo</strong></td><td><span class="field-opt">Opt.</span></td><td>Quantidade que aciona alerta de reposição</td></tr>
-        </tbody>
-      </table></div>
-      <div class="screenshot screenshot-tall"><div class="screenshot-tag">TELA-02</div><div class="screenshot-icon">📝</div><div class="screenshot-label">Formulário de cadastro de Item de Suprimento</div><div class="screenshot-hint">Inserir print do modal com campos preenchidos de exemplo</div></div>
+      <div class="step-head"><div class="step-title">Aba Farol de Contratações — leia o semáforo</div><div class="step-time">~3 min</div></div>
+      <p class="step-text">Esta é a visão principal: uma <strong>matriz colorida</strong> que cruza cada item de contratação com as obras selecionadas. Antes de usar a matriz, configure o que você quer visualizar.</p>
+
+      <p class="step-text" style="margin-top:10px;"><strong>Barra de ferramentas do Farol:</strong></p>
+      <div class="toolbar-demo">
+        <div class="toolbar-demo-icon">⚙️</div>
+        <div class="toolbar-demo-icon">🎚</div>
+        <div class="toolbar-demo-btn">Abrir Farol</div>
+        <div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:white;font-size:11px;padding:4px 8px;border-radius:5px;display:inline-flex;align-items:center;gap:5px;">☑ Carregar Processos</div>
+        <div class="toolbar-demo-icon">⋮</div>
+      </div>
+
+      <ul class="sub-steps" style="margin-top:12px;">
+        <li><strong>⚙️ Configurações</strong> — ajusta o buffer de dias e o limiar de flag amarela.</li>
+        <li><strong>🎚 Selecionar Contratações e Obras</strong> — escolha quais itens de suprimento e obras aparecem na matriz.</li>
+        <li><strong>Abrir Farol</strong> — carrega o último snapshot salvo; uma notificação confirma quantas obras e itens foram carregados.</li>
+        <li><strong>Carregar Processos</strong> — quando marcado, os processos de contratação são carregados junto com o farol.</li>
+        <li><strong>⋮ Mais ações</strong> — permite carregar versões históricas do snapshot.</li>
+      </ul>
+
+      <p class="step-text" style="margin-top:14px;"><strong>Lendo as cores da matriz:</strong></p>
+      <div class="matrix-demo">
+        <div class="matrix-row matrix-header">
+          <div class="matrix-cell-label" style="background:var(--surface);"></div>
+          <div class="matrix-cell mc-head">Obra A</div>
+          <div class="matrix-cell mc-head">Obra B</div>
+          <div class="matrix-cell mc-head">Obra C</div>
+        </div>
+        <div class="matrix-row">
+          <div class="matrix-cell-label">Esquadrias</div>
+          <div class="matrix-cell mc-green">Verde</div>
+          <div class="matrix-cell mc-amber">⚠ Amarelo</div>
+          <div class="matrix-cell mc-red">🔴 Vermelho</div>
+        </div>
+        <div class="matrix-row">
+          <div class="matrix-cell-label">Cimento CP-II</div>
+          <div class="matrix-cell mc-gray">—</div>
+          <div class="matrix-cell mc-green">Verde</div>
+          <div class="matrix-cell mc-amber">⚠ Amarelo</div>
+        </div>
+        <div class="matrix-row">
+          <div class="matrix-cell-label">Tubulação</div>
+          <div class="matrix-cell mc-red">🔴 Vermelho</div>
+          <div class="matrix-cell mc-gray">—</div>
+          <div class="matrix-cell mc-green">Verde</div>
+        </div>
+      </div>
+
+      <div class="chip-row" style="margin-top:12px;">
+        <span class="chip chip-green">Verde — processo no prazo</span>
+        <span class="chip chip-amber">Amarelo — prazo próximo, atenção necessária</span>
+        <span class="chip chip-red">Vermelho — prazo vencido ou crítico</span>
+        <span class="chip chip-gray">Cinza — processo não iniciado ou item sem processo</span>
+      </div>
+
+      <div class="callout callout-tip" style="margin-top:14px;"><span class="callout-icon">👆</span><div class="callout-text"><strong>Clique em qualquer célula colorida</strong> para abrir o diálogo completo do processo de contratação daquele item naquela obra (ver Passo 5).</div></div>
+
+      <div class="screenshot screenshot-tall"><div class="screenshot-tag">TELA-02</div><div class="screenshot-icon">🚦</div><div class="screenshot-label">Matriz do Farol com células coloridas por status de risco</div><div class="screenshot-hint">Inserir print da matriz com células verde/amarelo/vermelho e toolbar superior</div></div>
     </div>
   </div>
 
+  <!-- STEP 3 -->
   <div class="step-block">
     <div class="step-line"></div>
     <div class="step-num-col"><div class="step-circle">3</div></div>
     <div class="step-body">
-      <div class="step-head"><div class="step-title">Abra um Processo de Suprimento</div><div class="step-time">~3 min</div></div>
-      <p class="step-text">Clique no item na matriz para abrir o Processo de Suprimento. Preencha:</p>
+      <div class="step-head"><div class="step-title">Aba Acompanhamento — gerencie os processos</div><div class="step-time">~4 min</div></div>
+      <p class="step-text">A aba <strong>Acompanhamento</strong> exibe todos os processos de contratação em formato de <strong>cartões (cards)</strong>. Use filtros e busca para encontrar o que precisa, e clique em qualquer cartão para ver os detalhes.</p>
+
+      <p class="step-text" style="margin-top:12px;"><strong>Barra de ferramentas do Acompanhamento:</strong></p>
+      <div class="toolbar-demo">
+        <span style="font-size:18px;color:#e53935;">K</span>
+        <div class="toolbar-demo-title">Acompanhamento de Processos</div>
+        <div class="toolbar-demo-icon" title="Filtros">🎚</div>
+        <div class="toolbar-demo-icon" title="Pesquisar">🔍</div>
+        <div class="toolbar-demo-icon" title="Filtrar">▤</div>
+        <div class="toolbar-demo-icon" title="Ordenar">↕</div>
+        <div class="toolbar-demo-icon" title="Novo Processo">＋</div>
+        <div class="toolbar-demo-icon" title="Tela cheia">⛶</div>
+        <div class="toolbar-demo-icon" title="Mais ações">⋮</div>
+      </div>
+
+      <div class="mini-table-wrap" style="margin-top:12px;"><table class="mini-table">
+        <thead><tr><th>Botão</th><th>O que faz</th></tr></thead>
+        <tbody>
+          <tr><td>🎚 Filtros (gaveta)</td><td>Expande/recolhe o painel de filtros por Obra, Item, Responsável e Setor ativo</td></tr>
+          <tr><td>🔍 Pesquisar</td><td>Mostra/oculta a barra de busca inline; filtra por descrição ou setor em tempo real</td></tr>
+          <tr><td>▤ Filtrar</td><td>Abre o diálogo de filtros avançados (mesmo do AppBar)</td></tr>
+          <tr><td>↕ Ordenar</td><td>Abre opções de ordenação dos processos</td></tr>
+          <tr><td><strong>＋ Novo Processo</strong></td><td>Cria um novo processo de contratação</td></tr>
+          <tr><td>⋮ Mais ações</td><td>Imprimir PDF, Exportar para Excel, Configurações</td></tr>
+        </tbody>
+      </table></div>
+
+      <p class="step-text" style="margin-top:14px;"><strong>Painel de filtros (gaveta expansível):</strong> ao clicar em 🎚, aparecem quatro filtros expansíveis — Obras, Itens, Responsável e Setor ativo. Selecione os critérios desejados e clique em <strong>"Pesquisar"</strong> para recarregar a lista.</p>
+
+      <p class="step-text" style="margin-top:12px;"><strong>Cartões de processo</strong> — cada cartão exibe:</p>
       <ul class="sub-steps">
-        <li><strong>Status do processo</strong> — etapa atual da contratação.</li>
-        <li><strong>Datas</strong> — início da cotação, prazo de decisão, data prevista de entrega.</li>
-        <li><strong>Responsável</strong> — quem está conduzindo.</li>
-        <li><strong>Atividades vinculadas</strong> — atividades do cronograma que dependem deste insumo.</li>
+        <li><strong>Círculo colorido</strong> (esquerda) — cor do status atual do processo (verde/amarelo/vermelho/cinza).</li>
+        <li><strong>Descrição</strong> do processo e nome da <strong>etapa ativa</strong> abaixo.</li>
+        <li><strong>Badge "X/N"</strong> — etapa atual sobre o total de etapas (ex.: 2/5).</li>
+        <li><strong>Data de vencimento</strong> da etapa atual com cor indicativa de risco.</li>
       </ul>
-      <div class="callout callout-tip"><span class="callout-icon">💡</span><div class="callout-text"><strong>Por que vincular atividades?</strong> O sistema usa a data de início da atividade para calcular automaticamente quando o insumo precisa ser entregue e colorir o semáforo.</div></div>
-      <div class="screenshot screenshot-tall"><div class="screenshot-tag">TELA-03</div><div class="screenshot-icon">🔗</div><div class="screenshot-label">Painel do Processo com atividades vinculadas ao cronograma</div><div class="screenshot-hint">Inserir print mostrando o painel lateral com datas e vínculo ao cronograma</div></div>
+
+      <div class="callout callout-tip" style="margin-top:10px;"><span class="callout-icon">👆</span><div class="callout-text"><strong>Clique no cartão</strong> para abrir o diálogo completo do processo. <strong>Segure pressionado (long press)</strong> para abrir o diálogo de edição rápida — disponível para gestores e administradores.</div></div>
+
+      <p class="step-text" style="margin-top:12px;">Cada cartão também é um <strong>painel expansível</strong>: clique na seta à direita para expandir e ver um resumo rápido das etapas sem abrir o diálogo completo.</p>
+
+      <div class="screenshot screenshot-tall"><div class="screenshot-tag">TELA-03</div><div class="screenshot-icon">▶▶</div><div class="screenshot-label">Aba Acompanhamento — lista de cartões de processos com painel de filtros aberto</div><div class="screenshot-hint">Inserir print da lista de processos com filtros expandidos e cartão expandido</div></div>
     </div>
   </div>
 
+  <!-- STEP 4 -->
   <div class="step-block">
     <div class="step-line"></div>
     <div class="step-num-col"><div class="step-circle">4</div></div>
     <div class="step-body">
-      <div class="step-head"><div class="step-title">Interprete o Semáforo de Risco</div><div class="step-time">~2 min</div></div>
-      <p class="step-text">Cada célula da matriz exibe uma cor baseada no SLA e nas datas das atividades vinculadas:</p>
-      <div class="chip-row">
-        <span class="chip chip-green">Verde — No prazo</span>
-        <span class="chip chip-amber">Amarelo — Atenção</span>
-        <span class="chip chip-red">Vermelho — Em risco</span>
-      </div>
-      <p class="step-text" style="margin-top:10px;">Clique em uma célula colorida para ver por que o risco foi calculado e qual atividade está ameaçada.</p>
-      <div class="screenshot screenshot-short"><div class="screenshot-tag">TELA-04</div><div class="screenshot-icon">🚦</div><div class="screenshot-label">Matriz com semáforo colorido e painel de detalhes ao clicar</div><div class="screenshot-hint">Inserir print da matriz com células verde/amarelo/vermelho visíveis</div></div>
+      <div class="step-head"><div class="step-title">Aba Lista de Processos — grade tabular</div><div class="step-time">~2 min</div></div>
+      <p class="step-text">A <strong>Lista de Processos</strong> exibe todos os processos em uma grade tabular interativa. Ideal para uma visão gerencial rápida ou para exportar dados.</p>
+
+      <p class="step-text" style="margin-top:10px;"><strong>Colunas visíveis por padrão:</strong></p>
+      <div class="mini-table-wrap"><table class="mini-table">
+        <thead><tr><th>Coluna</th><th>Descrição</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Descrição</strong></td><td>Nome do processo de contratação</td></tr>
+          <tr><td><strong>OBS</strong></td><td>Observações livres do processo</td></tr>
+          <tr><td><strong>Status</strong></td><td>Não iniciado / Em andamento / Concluído</td></tr>
+          <tr><td><strong>Etapa ativa</strong></td><td>Nome da SLA/etapa em curso</td></tr>
+          <tr><td><strong>Setor ativo</strong></td><td>Setor responsável pela etapa atual</td></tr>
+          <tr><td><strong>Início Contratação</strong></td><td>Data planejada para início do processo</td></tr>
+          <tr><td><strong>Fim — Prev. Atualizado</strong></td><td>Prazo de fim recalculado com base no cronograma</td></tr>
+          <tr><td><strong>Início / Fim Real</strong></td><td>Datas registradas na execução</td></tr>
+          <tr><td><strong>Tipo / Categoria do Item</strong></td><td>Classificação do insumo</td></tr>
+          <tr><td><strong>Ações</strong></td><td>Botão para abrir o diálogo do processo</td></tr>
+        </tbody>
+      </table></div>
+
+      <ul class="sub-steps" style="margin-top:12px;">
+        <li><strong>Pesquisa</strong> na barra superior — filtra por qualquer texto nas linhas.</li>
+        <li><strong>Clique no cabeçalho</strong> de qualquer coluna para ordenar (↑ / ↓ / neutro — tri-state).</li>
+        <li><strong>Arraste colunas</strong> pelo cabeçalho para reordenar; <strong>arraste a borda</strong> para redimensionar.</li>
+        <li><strong>Selecionar colunas</strong> — botão na toolbar que controla visibilidade de cada coluna.</li>
+        <li><strong>Exportar Excel</strong> — gera um <code>.xlsx</code> com as colunas e filtros ativos no momento.</li>
+        <li><strong>Atualizar</strong> — recarrega a lista de processos com dados mais recentes.</li>
+      </ul>
+
+      <div class="callout callout-tip"><span class="callout-icon">💡</span><div class="callout-text"><strong>Colunas ocultas por padrão</strong> — Obra, ID do Processo, Responsável e outras — podem ser ativadas pelo seletor de colunas. Útil quando você trabalha com múltiplas obras ao mesmo tempo.</div></div>
+
+      <div class="screenshot screenshot-tall"><div class="screenshot-tag">TELA-04</div><div class="screenshot-icon">⊞</div><div class="screenshot-label">Aba Lista de Processos — DataGrid com colunas e toolbar de ações</div><div class="screenshot-hint">Inserir print da grade tabular com colunas visíveis e barra de busca</div></div>
     </div>
   </div>
 
+  <!-- STEP 5 -->
   <div class="step-block">
     <div class="step-num-col"><div class="step-circle">5</div></div>
     <div class="step-body">
-      <div class="step-head"><div class="step-title">Exporte o relatório</div><div class="step-time">~1 min</div></div>
-      <p class="step-text">Use os botões no canto superior direito para exportar:</p>
-      <div class="chip-row">
-        <span class="chip chip-green">Excel (.xlsx) — Detalhado por item</span>
-        <span class="chip chip-blue">CSV — Multi-obra consolidado</span>
+      <div class="step-head"><div class="step-title">Diálogo do Processo — 5 abas de detalhes</div><div class="step-time">~3 min</div></div>
+      <p class="step-text">Ao clicar em qualquer processo (seja na matriz, nos cartões ou na grade), abre-se o <strong>Diálogo de Informações do Processo</strong>. Ele concentra todas as informações e ações em um único lugar.</p>
+
+      <div class="dialog-demo">
+        <div class="dialog-header">
+          <div class="dialog-avatar">🏗</div>
+          <div class="dialog-header-info">
+            <strong>Fornecimento de Esquadrias — Bloco A</strong>
+            <span>📍 Residencial Kaizen — Em andamento</span>
+          </div>
+          <div class="dialog-header-actions">
+            <div class="dialog-action-btn" title="Alertas">🔔</div>
+            <div class="dialog-action-btn" title="Exportar Excel">📥</div>
+            <div class="dialog-action-btn" title="Editar">✏️</div>
+          </div>
+        </div>
+        <div class="dialog-tabs">
+          <div class="dialog-tab active">Status</div>
+          <div class="dialog-tab">Etapas</div>
+          <div class="dialog-tab">Atividades</div>
+          <div class="dialog-tab">Chat</div>
+          <div class="dialog-tab">Histórico</div>
+        </div>
+        <div class="dialog-body">Selecione uma aba acima para ver os detalhes do processo.</div>
       </div>
-      <div class="callout callout-success"><span class="callout-icon">✅</span><div class="callout-text"><strong>Pronto!</strong> Com atividades vinculadas, o semáforo é atualizado automaticamente conforme o cronograma avança.</div></div>
+
+      <p class="step-text" style="margin-top:14px;"><strong>Cabeçalho do diálogo:</strong></p>
+      <ul class="sub-steps">
+        <li><strong>Badge de status</strong> (Não iniciado / Em andamento / Concluído) com cor correspondente.</li>
+        <li><strong>Chips de progresso</strong> — etapa X de N total, lead time em dias úteis e dias corridos.</li>
+        <li><strong>🔔 Alertas</strong> — configura e consulta alertas automáticos de prazo para este processo.</li>
+        <li><strong>📥 Exportar Excel</strong> — gera planilha com informações do processo e timeline de etapas.</li>
+        <li><strong>✏️ Editar</strong> — abre o diálogo de edição (mesmo efeito do long press no cartão).</li>
+      </ul>
+
+      <p class="step-text" style="margin-top:14px;"><strong>As 5 abas do diálogo:</strong></p>
+      <div class="mini-table-wrap"><table class="mini-table">
+        <thead><tr><th>Aba</th><th>O que você encontra</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Status</strong></td><td>Situação atual do processo: etapa em andamento, prazo previsto, informações do responsável e ações rápidas de avanço de etapa</td></tr>
+          <tr><td><strong>Etapas</strong></td><td>Timeline completa de todas as SLAs (etapas) do processo — nome, status, datas planejadas, datas reais e dias úteis / corridos de cada uma</td></tr>
+          <tr><td><strong>Atividades</strong></td><td>Atividades do cronograma Kaizen vinculadas a este processo; é a partir dessas datas que o semáforo calcula o risco</td></tr>
+          <tr><td><strong>Chat</strong></td><td>Mensagens internas entre a equipe; suporta <code>@menções</code> a usuários e é vinculado à obra e ao item</td></tr>
+          <tr><td><strong>Histórico</strong></td><td>Log de todos os eventos do processo (avances de etapa, edições, alertas enviados) com data e usuário responsável</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="callout callout-success" style="margin-top:14px;"><span class="callout-icon">✅</span><div class="callout-text"><strong>Pronto!</strong> As três abas trabalham juntas: use o <strong>Farol</strong> para identificar riscos visualmente, o <strong>Acompanhamento</strong> para gerenciar o dia a dia dos processos e a <strong>Lista</strong> para visão gerencial e exportações.</div></div>
+
+      <div class="screenshot screenshot-tall"><div class="screenshot-tag">TELA-05</div><div class="screenshot-icon">📋</div><div class="screenshot-label">Diálogo do Processo aberto na aba Etapas — timeline de SLAs</div><div class="screenshot-hint">Inserir print do diálogo com as 5 abas visíveis e a aba Etapas ativa</div></div>
     </div>
   </div>
 
