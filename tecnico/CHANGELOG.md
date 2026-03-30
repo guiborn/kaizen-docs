@@ -56,25 +56,6 @@ Este documento registra todas as versões e mudanças implementadas no sistema K
 
 ---
 
-## Versão 3.6.8
-
-### 1. Inspeção Final da Qualidade (IFQ)
-- **1.1.** Integração Salesforce
-- **1.2.** Melhorias na UX da criação de máscaras e gestão de pendências
-- **1.3.** Mini Dash por inspeção
-
-### 2. Farol de Contratações
-- **2.1.** Correção de Bugs
-
-### 3. Dashboard Gerencial de Restrições
-- **3.1.** Desenvolvimento
-
-### 4. KAI
-- **4.1.** Melhorias no KAI Restriction Analyst
-- **4.2.** Lançamento do KAI Chat
-
----
-
 ## Versão 3.6.7
 
 ### 1. Inspeção Final da Qualidade (IFQ)

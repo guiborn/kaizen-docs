@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Índice de Tutoriais — Kaizen</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f7f8fc;--white:#ffffff;--surface:#f0f2f8;--border:#e2e6f0;
+  --text:#111827;--text-mid:#374151;--text-muted:#6b7280;
+  --accent:#1d4ed8;--accent-light:#eff6ff;--accent-mid:#3b82f6;
+  --green:#059669;--green-light:#ecfdf5;
+  --amber:#d97706;--amber-light:#fffbeb;
+  --red:#dc2626;--red-light:#fef2f2;
+  --purple:#7c3aed;--purple-light:#f5f3ff;
+}
+*{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:14px 48px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.topbar-left{display:flex;align-items:center;gap:12px;text-decoration:none;}
+.logo-icon{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:16px;font-weight:800;}
+.logo-name{font-size:15px;font-weight:700;color:var(--text);}
+.topbar-back{font-size:13px;color:var(--text-muted);text-decoration:none;display:flex;align-items:center;gap:5px;}
+.topbar-back:hover{color:var(--accent);}
+.hero{background:var(--white);border-bottom:1px solid var(--border);padding:56px 48px 48px;}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;background:var(--accent-light);color:var(--accent);border:1px solid #bfdbfe;padding:4px 12px;border-radius:100px;margin-bottom:14px;}
+.hero h1{font-size:38px;font-weight:800;letter-spacing:-1px;line-height:1.15;margin-bottom:10px;}
+.hero p{font-size:16px;color:var(--text-muted);max-width:520px;}
+.hero-stats{display:flex;gap:32px;margin-top:24px;}
+.stat{font-size:12px;color:var(--text-muted);}
+.stat strong{display:block;font-size:22px;font-weight:800;color:var(--text);letter-spacing:-0.5px;}
+.content{padding:40px 48px 80px;max-width:1100px;}
+.section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--text-muted);margin-bottom:14px;margin-top:36px;display:flex;align-items:center;gap:10px;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+.section-label:first-child{margin-top:0;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:8px;}
+.card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px;text-decoration:none;display:block;transition:all .15s;position:relative;overflow:hidden;}
+.card:hover{border-color:var(--accent-mid);transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.07);}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:12px 12px 0 0;}
+.card.blue::before{background:var(--accent);}
+.card.green::before{background:var(--green);}
+.card.amber::before{background:var(--amber);}
+.card.red::before{background:var(--red);}
+.card.purple::before{background:var(--purple);}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
+.card-icon{font-size:22px;}
+.card-steps{font-size:11px;font-family:'JetBrains Mono',monospace;background:var(--surface);color:var(--text-muted);padding:3px 8px;border-radius:20px;}
+.card-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:5px;}
+.card-desc{font-size:13px;color:var(--text-muted);line-height:1.55;}
+.card-meta{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;align-items:center;}
+.card-pill{font-size:11px;font-family:'JetBrains Mono',monospace;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);padding:2px 8px;border-radius:5px;}
+.card-time{font-size:11.5px;color:var(--text-muted);}
+.tip{background:var(--accent-light);border:1px solid #bfdbfe;border-radius:10px;padding:14px 18px;display:flex;gap:12px;align-items:flex-start;margin-top:36px;font-size:13.5px;color:var(--text-mid);}
+.tip strong{color:var(--text);display:block;margin-bottom:2px;}
+code{font-family:'JetBrains Mono',monospace;font-size:12px;background:#e0e7ff;border:1px solid #c7d2fe;padding:1px 6px;border-radius:4px;color:var(--accent);}
+footer{padding:20px 48px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);background:var(--white);}
+@media(max-width:600px){.hero{padding:32px 20px;}.content{padding:24px 20px 60px;}.topbar{padding:12px 20px;}footer{padding:16px 20px;}.grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="#" class="topbar-left">
+    <div class="logo-icon">K</div>
+    <span class="logo-name">Kaizen — Tutoriais</span>
+  </a>
+  <a href="../" class="topbar-back">← Documentação Técnica</a>
+</div>
+
+<div class="hero">
+  <div class="hero-badge">📋 Manual do Usuário</div>
+  <h1>Índice de Tutoriais</h1>
+  <p>Guias passo a passo para cada módulo do Kaizen. Clique no tutorial para começar.</p>
+  <div class="hero-stats">
+    <div class="stat"><strong>13</strong> tutoriais</div>
+    <div class="stat"><strong>56</strong> passos no total</div>
+    <div class="stat"><strong>📸</strong> placeholders de screenshot</div>
+  </div>
+</div>
+
+<div class="content">
+
+  <div class="section-label">Rotinas de Gestão</div>
+  <div class="grid">
+    <a href="farol/index.html" class="card amber">
+      <div class="card-top"><span class="card-icon">🚦</span><span class="card-steps">5 passos</span></div>
+      <div class="card-title">Farol de Contratações</div>
+      <div class="card-desc">Acompanhe suprimentos com semáforo visual de risco vinculado ao cronograma.</div>
+      <div class="card-meta"><span class="card-time">⏱ ~10 min</span><span class="card-pill">supply_schedule</span></div>
+    </a>
+    <a href="planos/index.html" class="card blue">
+      <div class="card-top"><span class="card-icon">📌</span><span class="card-steps">6 passos</span></div>
+      <div class="card-title">Planos de Ação</div>
+      <div class="card-desc">Registre, atribua e acompanhe itens de ação com Kanban, lista e dashboard.</div>
+      <div class="card-meta"><span class="card-time">⏱ ~12 min</span><span class="card-pill">action_plans_view</span></div>
+    </a>
+    <a href="restricoes/index.html" class="card red">
+      <div class="card-top"><span class="card-icon">🚧</span><span class="card-steps">5 passos</span></div>
+      <div class="card-title">Quadro de Restrições</div>
+      <div class="card-desc">Lookahead de 8 semanas para identificar e remover bloqueios antes que parem a obra.</div>
+      <div class="card-meta"><span class="card-time">⏱ ~10 min</span><span class="card-pill">mid_term</span></div>
+    </a>
+  </div>
+
+  <div class="section-label">Materiais</div>
+  <div class="grid">
+    <a href="almoxarifado/index.html" class="card green">
+      <div class="card-top"><span class="card-icon">📦</span><span class="card-steps">6 passos</span></div>
+      <div class="card-title">Almoxarifado Digital</div>
+      <div class="card-desc">Do pedido à saída do estoque — rastreabilidade completa de materiais da obra.</div>
+      <div class="card-meta"><span class="card-time">⏱ ~15 min</span><span class="card-pill">warehouse_view</span></div>
+    </a>
+  </div>
+
+  <div class="section-label">Produtividade</div>
+  <div class="grid">
+    <a href="medicoes/index.html" class="card green">
+      <div class="card-top"><span class="card-icon">📏</span><span class="card-steps">4 passos</span></div>
+      <div class="card-title">Medições Kaizen</div>
+      <div class="card-desc">Registre a produção diária e acompanhe o índice de produtividade em tempo real.</div>
+      <div class="card-meta"><span class="card-time">⏱ ~8 min</span><span class="card-pill">daily_measurements</span></div>
+    </a>
+    <a href="kaizen-diario/index.html" class="card blue">
+      <div class="card-top"><span class="card-icon">📊</span><span class="card-steps">3 passos</span></div>
+      <div class="card-title">Kaizen Diário</div>
+      <div class="card-desc">Dashboard de acompanhamento diário. Ideal para o DDS e reunião de obra.</div>
+      <div class="card-meta"><span class="card-time">⏱ ~5 min</span><span class="card-pill">daily_kaizen</span></div>
+    </a>
+  </div>
+
+  <div class="section-label">Planejamento</div>
+  <div class="grid">
+    <a href="gantt/index.html" class="card blue">
+      <div class="card-top"><span class="card-icon">📅</span><span class="card-steps">4 passos</span></div>
+      <div class="card-title">Gantt de Controle</div>
+      <div class="card-desc">Visualize e reprograme o cronograma. Identifique caminho crítico e dependências.</div>
+      <div class="card-meta"><span class="card-time">⏱ ~10 min</span><span class="card-pill">baseline_view</span></div>
+    </a>
+    <a href="curva-s/index.html" class="card blue">
+      <div class="card-top"><span class="card-icon">📈</span><span class="card-steps">3 passos</span></div>
+      <div class="card-title">Curva S</div>
+      <div class="card-desc">Compare avanço real vs. previsto vs. baseline. Identifique atrasos visualmente.</div>
+      <div class="card-meta"><span class="card-time">⏱ ~5 min</span><span class="card-pill">baseline_view</span></div>
+    </a>
+  </div>
+
+  <div class="section-label">Qualidade</div>
+  <div class="grid">
+    <a href="fvs/index.html" class="card green">
+      <div class="card-top"><span class="card-icon">✅</span><span class="card-steps">5 passos</span></div>
+      <div class="card-title">Gestão de FVS</div>
+      <div class="card-desc">Preencha, inspecione e aprove Fichas de Verificação de Serviço com foto e PDF.</div>
+      <div class="card-meta"><span class="card-time">⏱ ~12 min</span><span class="card-pill">fvs_fill / fvs_approval</span></div>
+    </a>
+    <a href="lean/index.html" class="card green">
+      <div class="card-top"><span class="card-icon">🧹</span><span class="card-steps">4 passos</span></div>
+      <div class="card-title">Estabilização Lean</div>
+      <div class="card-desc">Checklists 5S digitais com score automático e histórico de evolução em 24 meses.</div>
+      <div class="card-meta"><span class="card-time">⏱ ~8 min</span><span class="card-pill">lean_inspection</span></div>
+    </a>
+  </div>
+
+  <div class="section-label">Controle de Unidades</div>
+  <div class="grid">
+    <a href="vistoria/index.html" class="card purple">
+      <div class="card-top"><span class="card-icon">🏠</span><span class="card-steps">5 passos</span></div>
+      <div class="card-title">Vistoria do Cliente</div>
+      <div class="card-desc">Conduza a vistoria no app. Assinatura digital e Laudo PDF gerado na hora.</div>
+      <div class="card-meta"><span class="card-time">⏱ ~15 min</span><span class="card-pill">units</span></div>
+    </a>
+  </div>
+
+  <div class="section-label">Assistência Técnica</div>
+  <div class="grid">
+    <a href="workorders/index.html" class="card red">
+      <div class="card-top"><span class="card-icon">🔧</span><span class="card-steps">4 passos</span></div>
+      <div class="card-title">Work Orders</div>
+      <div class="card-desc">Gerencie ordens de serviço do Salesforce. Filtre, atualize status e exporte Excel.</div>
+      <div class="card-meta"><span class="card-time">⏱ ~8 min</span><span class="card-pill">Módulo AT</span></div>
+    </a>
+    <a href="agendamentos/index.html" class="card blue">
+      <div class="card-top"><span class="card-icon">📆</span><span class="card-steps">4 passos</span></div>
+      <div class="card-title">Agendamentos AT</div>
+      <div class="card-desc">Crie e gerencie compromissos dos técnicos em tempo real, com suporte offline.</div>
+      <div class="card-meta"><span class="card-time">⏱ ~8 min</span><span class="card-pill">Módulo AT</span></div>
+    </a>
+  </div>
+
+  <div class="tip">
+    <span style="font-size:18px;flex-shrink:0">📸</span>
+    <div>
+      <strong>Como substituir os placeholders de screenshot</strong>
+      Cada tutorial tem espaços marcados com <code>TELA-XX</code>. Clique no espaço cinza tracejado para ver qual print precisa ser inserido. Substitua o bloco <code>.screenshot</code> por uma tag <code>&lt;img src="caminho/screenshot.png" alt="..."&gt;</code> com o print real.
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <span>© 2026 Kaizen — Manual do Usuário v1.0</span>
+  <span>13 tutoriais · 56 passos</span>
+</footer>
+</body>
+</html>

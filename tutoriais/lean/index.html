@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estabilização Lean — Kaizen Tutoriais</title>
+<style>/* ── KAIZEN TUTORIAIS — SHARED STYLES ── */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg: #f7f8fc;
+  --white: #ffffff;
+  --surface: #f0f2f8;
+  --border: #e2e6f0;
+  --border-strong: #c8cfe0;
+  --text: #111827;
+  --text-mid: #374151;
+  --text-muted: #6b7280;
+  --accent: #1d4ed8;
+  --accent-light: #eff6ff;
+  --accent-mid: #3b82f6;
+  --green: #059669;
+  --green-light: #ecfdf5;
+  --amber: #d97706;
+  --amber-light: #fffbeb;
+  --red: #dc2626;
+  --red-light: #fef2f2;
+  --purple: #7c3aed;
+  --purple-light: #f5f3ff;
+  --sidebar-w: 260px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.7; }
+
+/* SIDEBAR */
+.sidebar { position:fixed; top:0; left:0; bottom:0; width:var(--sidebar-w); background:var(--white); border-right:1px solid var(--border); overflow-y:auto; z-index:200; display:flex; flex-direction:column; }
+.sidebar-logo { padding:20px 16px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; text-decoration:none; }
+.logo-icon { width:32px; height:32px; background:var(--accent); border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; font-size:16px; font-weight:800; flex-shrink:0; }
+.logo-text .logo-name { font-size:14px; font-weight:700; color:var(--text); }
+.logo-text .logo-sub { font-size:11px; color:var(--text-muted); }
+.nav-group { padding:14px 10px 4px; }
+.nav-group-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.8px; color:var(--text-muted); padding:0 6px; margin-bottom:4px; }
+.nav-link { display:flex; align-items:center; gap:7px; padding:6px 8px; border-radius:7px; color:var(--text-mid); text-decoration:none; font-size:12.5px; font-weight:500; transition:all .12s; }
+.nav-link:hover { background:var(--surface); color:var(--text); }
+.nav-link.active { background:var(--accent-light); color:var(--accent); font-weight:600; }
+.nav-link.index-link { color:var(--accent); font-weight:600; font-size:12px; }
+.nav-link .nav-icon { font-size:13px; width:18px; text-align:center; flex-shrink:0; }
+.nav-link .nav-badge { margin-left:auto; font-size:10px; background:var(--surface); color:var(--text-muted); padding:1px 5px; border-radius:20px; font-family:'JetBrains Mono',monospace; }
+
+/* MAIN */
+.main { margin-left:var(--sidebar-w); min-height:100vh; }
+
+/* TOPBAR */
+.topbar { position:sticky; top:0; background:rgba(247,248,252,0.92); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); padding:12px 40px; display:flex; align-items:center; justify-content:space-between; z-index:100; }
+.topbar-breadcrumb { font-size:13px; color:var(--text-muted); display:flex; align-items:center; gap:6px; }
+.topbar-breadcrumb a { color:var(--text-muted); text-decoration:none; }
+.topbar-breadcrumb a:hover { color:var(--accent); }
+.topbar-breadcrumb span { color:var(--text); font-weight:600; }
+.progress-wrap { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-muted); }
+.progress-bar-outer { width:100px; height:3px; background:var(--border); border-radius:99px; overflow:hidden; }
+.progress-bar-inner { height:100%; background:var(--accent-mid); border-radius:99px; transition:width .15s; width:0%; }
+
+/* CONTENT */
+.content { padding:0 40px 80px; max-width:860px; }
+
+/* TUTORIAL HEADER */
+.tutorial-header { padding-top:48px; margin-bottom:32px; }
+.module-tag { display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; padding:4px 12px; border-radius:100px; margin-bottom:12px; }
+.tag-blue { background:var(--accent-light); color:var(--accent); border:1px solid #bfdbfe; }
+.tag-green { background:var(--green-light); color:var(--green); border:1px solid #a7f3d0; }
+.tag-amber { background:var(--amber-light); color:var(--amber); border:1px solid #fcd34d; }
+.tag-purple { background:var(--purple-light); color:var(--purple); border:1px solid #ddd6fe; }
+.tag-red { background:var(--red-light); color:var(--red); border:1px solid #fecaca; }
+.tutorial-title { font-size:32px; font-weight:800; letter-spacing:-0.8px; line-height:1.15; margin-bottom:8px; }
+.tutorial-desc { font-size:15px; color:var(--text-muted); max-width:620px; font-weight:400; }
+.tutorial-meta { display:flex; gap:20px; margin-top:16px; flex-wrap:wrap; }
+.meta-item { display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--text-muted); }
+.meta-item strong { color:var(--text-mid); font-weight:600; }
+.meta-pill { display:inline-flex; align-items:center; font-size:11.5px; font-family:'JetBrains Mono',monospace; background:var(--surface); border:1px solid var(--border); color:var(--text-mid); padding:2px 8px; border-radius:5px; }
+
+/* NAV BUTTONS */
+.nav-buttons { display:flex; justify-content:space-between; align-items:center; margin-top:56px; padding-top:24px; border-top:1px solid var(--border); }
+.nav-btn { display:inline-flex; align-items:center; gap:8px; padding:10px 18px; border-radius:9px; font-size:13.5px; font-weight:600; text-decoration:none; transition:all .15s; border:1px solid var(--border); color:var(--text-mid); background:var(--white); }
+.nav-btn:hover { border-color:var(--accent-mid); color:var(--accent); background:var(--accent-light); }
+.nav-btn.primary { background:var(--accent); color:white; border-color:var(--accent); }
+.nav-btn.primary:hover { background:#1e40af; }
+.nav-btn-placeholder { width:120px; }
+
+/* STEPS */
+.steps-container { margin-top:8px; }
+.step-block { display:grid; grid-template-columns:52px 1fr; gap:0 18px; position:relative; }
+.step-block:not(:last-child) .step-line { position:absolute; left:25px; top:50px; bottom:-1px; width:2px; background:var(--border); z-index:0; }
+.step-num-col { display:flex; flex-direction:column; align-items:center; padding-top:16px; position:relative; z-index:1; }
+.step-circle { width:34px; height:34px; border-radius:50%; background:var(--white); border:2px solid var(--border-strong); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:var(--text-muted); flex-shrink:0; }
+.step-body { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:18px 22px; margin-bottom:12px; }
+.step-body:hover { border-color:var(--border-strong); box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+.step-head { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:10px; }
+.step-title { font-size:15px; font-weight:700; color:var(--text); line-height:1.3; }
+.step-time { font-size:11px; color:var(--text-muted); background:var(--surface); padding:2px 8px; border-radius:20px; white-space:nowrap; flex-shrink:0; margin-left:12px; }
+.step-text { font-size:13.5px; color:var(--text-mid); line-height:1.65; margin-bottom:0; }
+
+/* SCREENSHOT */
+.screenshot { margin-top:14px; background:var(--surface); border:2px dashed var(--border-strong); border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:28px; cursor:pointer; transition:all .15s; position:relative; overflow:hidden; }
+.screenshot:hover { border-color:var(--accent-mid); background:var(--accent-light); }
+.screenshot-tall { min-height:200px; }
+.screenshot-short { min-height:130px; }
+.screenshot-icon { font-size:26px; opacity:.4; }
+.screenshot-label { font-size:12px; font-weight:600; color:var(--text-muted); text-align:center; }
+.screenshot-hint { font-size:11px; color:var(--text-muted); opacity:.7; text-align:center; }
+.screenshot-tag { position:absolute; top:8px; right:8px; font-size:10px; font-family:'JetBrains Mono',monospace; background:var(--white); border:1px solid var(--border); color:var(--text-muted); padding:2px 7px; border-radius:4px; }
+
+/* CALLOUT */
+.callout { display:flex; gap:12px; padding:13px 16px; border-radius:10px; margin-top:14px; font-size:13.5px; }
+.callout-icon { font-size:16px; flex-shrink:0; line-height:1.6; }
+.callout-text { color:var(--text-mid); line-height:1.6; }
+.callout-text strong { color:var(--text); display:block; margin-bottom:2px; }
+.callout-tip { background:var(--accent-light); border:1px solid #bfdbfe; }
+.callout-warn { background:var(--amber-light); border:1px solid #fcd34d; }
+.callout-success { background:var(--green-light); border:1px solid #a7f3d0; }
+
+/* SUB-STEPS */
+.sub-steps { list-style:none; margin-top:10px; display:flex; flex-direction:column; gap:6px; }
+.sub-steps li { display:flex; align-items:flex-start; gap:8px; font-size:13px; color:var(--text-mid); }
+.sub-steps li::before { content:'→'; color:var(--accent-mid); font-weight:700; flex-shrink:0; margin-top:1px; }
+
+/* CHIP */
+.chip-row { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.chip { font-size:12px; font-weight:600; padding:3px 10px; border-radius:20px; display:inline-flex; align-items:center; gap:5px; }
+.chip::before { content:'●'; font-size:8px; }
+.chip-blue { background:var(--accent-light); color:var(--accent); }
+.chip-green { background:var(--green-light); color:var(--green); }
+.chip-amber { background:var(--amber-light); color:var(--amber); }
+.chip-red { background:var(--red-light); color:var(--red); }
+.chip-gray { background:var(--surface); color:var(--text-muted); }
+.chip-purple { background:var(--purple-light); color:var(--purple); }
+
+/* TABLE */
+.mini-table-wrap { border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-top:10px; }
+.mini-table { width:100%; border-collapse:collapse; font-size:13px; }
+.mini-table th { text-align:left; padding:7px 12px; background:var(--surface); color:var(--text-muted); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; border-bottom:1px solid var(--border); }
+.mini-table td { padding:8px 12px; border-bottom:1px solid var(--border); color:var(--text-mid); vertical-align:top; }
+.mini-table tr:last-child td { border-bottom:none; }
+.field-req { color:var(--red); font-size:11px; font-weight:700; }
+.field-opt { color:var(--text-muted); font-size:11px; }
+
+code { font-family:'JetBrains Mono',monospace; font-size:12px; background:var(--surface); border:1px solid var(--border); padding:1px 6px; border-radius:4px; color:var(--accent); }
+
+/* FOOTER */
+.footer { margin-left:var(--sidebar-w); padding:18px 40px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--text-muted); background:var(--white); }
+
+@media (max-width:768px) {
+  :root { --sidebar-w: 0px; }
+  .sidebar { display:none; }
+  .content { padding:0 20px 60px; }
+  .topbar { padding:12px 20px; }
+  .footer { margin-left:0; padding:16px 20px; }
+}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+    <a href="../index.html" class="sidebar-logo">
+      <div class="logo-icon">K</div>
+      <div class="logo-text">
+        <div class="logo-name">Kaizen</div>
+        <div class="logo-sub">Manual do Usuário</div>
+      </div>
+    </a>
+    <div class="nav-group">
+      <div class="nav-group-label">Início</div>
+      <a href="../index.html" class="nav-link index-link"><span class="nav-icon">🏠</span> Índice de Tutoriais</a>
+    </div>
+    
+<div class="nav-group"><div class="nav-group-label">Rotinas de Gestão</div>
+<a href="../farol/index.html" class="nav-link"><span class="nav-icon">🚦</span> Farol de Contratações <span class="nav-badge">5 passos</span></a>
+<a href="../planos/index.html" class="nav-link"><span class="nav-icon">📌</span> Planos de Ação <span class="nav-badge">6 passos</span></a>
+<a href="../restricoes/index.html" class="nav-link"><span class="nav-icon">🚧</span> Quadro de Restrições <span class="nav-badge">5 passos</span></a>
+</div>
+<div class="nav-group"><div class="nav-group-label">Materiais</div>
+<a href="../almoxarifado/index.html" class="nav-link"><span class="nav-icon">📦</span> Almoxarifado Digital <span class="nav-badge">6 passos</span></a>
+</div>
+<div class="nav-group"><div class="nav-group-label">Produtividade</div>
+<a href="../medicoes/index.html" class="nav-link"><span class="nav-icon">📏</span> Medições Kaizen <span class="nav-badge">4 passos</span></a>
+<a href="../kaizen-diario/index.html" class="nav-link"><span class="nav-icon">📊</span> Kaizen Diário <span class="nav-badge">3 passos</span></a>
+</div>
+<div class="nav-group"><div class="nav-group-label">Planejamento</div>
+<a href="../gantt/index.html" class="nav-link"><span class="nav-icon">📅</span> Gantt de Controle <span class="nav-badge">4 passos</span></a>
+<a href="../curva-s/index.html" class="nav-link"><span class="nav-icon">📈</span> Curva S <span class="nav-badge">3 passos</span></a>
+</div>
+<div class="nav-group"><div class="nav-group-label">Qualidade</div>
+<a href="../fvs/index.html" class="nav-link"><span class="nav-icon">✅</span> Gestão de FVS <span class="nav-badge">5 passos</span></a>
+<a href="../lean/index.html" class="nav-link active"><span class="nav-icon">🧹</span> Estabilização Lean <span class="nav-badge">4 passos</span></a>
+</div>
+<div class="nav-group"><div class="nav-group-label">Unidades</div>
+<a href="../vistoria/index.html" class="nav-link"><span class="nav-icon">🏠</span> Vistoria do Cliente <span class="nav-badge">5 passos</span></a>
+</div>
+<div class="nav-group"><div class="nav-group-label">Assistência Técnica</div>
+<a href="../workorders/index.html" class="nav-link"><span class="nav-icon">🔧</span> Work Orders <span class="nav-badge">4 passos</span></a>
+<a href="../agendamentos/index.html" class="nav-link"><span class="nav-icon">📆</span> Agendamentos AT <span class="nav-badge">4 passos</span></a>
+</div></nav>
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-breadcrumb">
+      <a href="../../">Kaizen Docs</a> › <a href="../index.html">Tutoriais</a> › <span>Estabilização Lean</span>
+    </div>
+    <div class="progress-wrap">
+      <span id="pl">0% lido</span>
+      <div class="progress-bar-outer"><div class="progress-bar-inner" id="pb"></div></div>
+    </div>
+  </div>
+  <div class="content">
+
+<div class="tutorial-header">
+  <div class="module-tag tag-green">🧹 Qualidade</div>
+  <h1 class="tutorial-title">Estabilização Lean</h1>
+  <div class="tutorial-meta">
+    <div class="meta-item">⏱ <strong>~8 min</strong></div>
+    <div class="meta-item">🔑 <span class="meta-pill">lean_inspection</span></div>
+    <div class="meta-item">👤 Engenheiro / Inspetor</div>
+  </div>
+</div>
+<div class="steps-container">
+
+  <div class="step-block">
+    <div class="step-line"></div>
+    <div class="step-num-col"><div class="step-circle">1</div></div>
+    <div class="step-body">
+      <div class="step-head"><div class="step-title">Inicie uma nova inspeção</div><div class="step-time">~1 min</div></div>
+      <p class="step-text">Acesse <strong>Rotinas de Gestão → Estabilização Lean</strong>. Clique em <strong>+ Nova Inspeção</strong> e preencha: data, torre/bloco inspecionado e responsável.</p>
+      <div class="screenshot screenshot-tall"><div class="screenshot-tag">TELA-01</div><div class="screenshot-icon">🖥️</div><div class="screenshot-label">Modal de nova inspeção com campos de data e torre</div><div class="screenshot-hint">Inserir print do modal de criação</div></div>
+    </div>
+  </div>
+
+  <div class="step-block">
+    <div class="step-line"></div>
+    <div class="step-num-col"><div class="step-circle">2</div></div>
+    <div class="step-body">
+      <div class="step-head"><div class="step-title">Preencha item por item</div><div class="step-time">~5 min</div></div>
+      <p class="step-text">Para cada item marque: <strong>Conforme</strong>, <strong>Parcial</strong> ou <strong>Não Conforme</strong>. Adicione foto de evidência e observação quando necessário. O score da seção é calculado automaticamente.</p>
+      <div class="screenshot screenshot-tall"><div class="screenshot-tag">TELA-02</div><div class="screenshot-icon">🖥️</div><div class="screenshot-label">Checklist com seções expandidas e score por seção calculado</div><div class="screenshot-hint">Inserir print do checklist com score visível por seção</div></div>
+    </div>
+  </div>
+
+  <div class="step-block">
+    <div class="step-line"></div>
+    <div class="step-num-col"><div class="step-circle">3</div></div>
+    <div class="step-body">
+      <div class="step-head"><div class="step-title">Veja o histórico de evolução</div><div class="step-time">~1 min</div></div>
+      <p class="step-text">Na tela principal, o <strong>gráfico de histórico</strong> mostra o score de cada inspeção dos últimos 24 meses com a linha de média histórica.</p>
+      <div class="screenshot screenshot-tall"><div class="screenshot-tag">TELA-03</div><div class="screenshot-icon">🖥️</div><div class="screenshot-label">Gráfico de evolução do score com linha de média</div><div class="screenshot-hint">Inserir print do gráfico de histórico</div></div>
+    </div>
+  </div>
+
+  <div class="step-block">
+    
+    <div class="step-num-col"><div class="step-circle">4</div></div>
+    <div class="step-body">
+      <div class="step-head"><div class="step-title">Exporte o relatório PDF</div><div class="step-time">~1 min</div></div>
+      <p class="step-text">Clique em <strong>Exportar PDF</strong> para gerar o relatório completo da inspeção com fotos e score por seção — ideal para apresentações de gestão e auditorias.</p>
+      <div class="screenshot screenshot-tall"><div class="screenshot-tag">TELA-04</div><div class="screenshot-icon">🖥️</div><div class="screenshot-label">Preview do relatório PDF de inspeção Lean</div><div class="screenshot-hint">Inserir print do relatório gerado</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="nav-buttons"><a href="../fvs/index.html" class="nav-btn">← ✅ Gestão de FVS</a><a href="../vistoria/index.html" class="nav-btn primary">🏠 Vistoria do Cliente →</a></div>
+  </div>
+</div>
+<footer class="footer">
+  <span>© 2026 Kaizen — Tutoriais v1.0</span>
+  <span>📸 Placeholders <code>TELA-XX</code> — substituir pelos screenshots reais</span>
+</footer>
+<script>
+window.addEventListener('scroll',()=>{
+  const el=document.getElementById('pb'),lb=document.getElementById('pl');
+  const t=document.body.scrollHeight-window.innerHeight;
+  const p=Math.round((window.scrollY/t)*100);
+  el.style.width=p+'%'; lb.textContent=p+'% lido';
+});
+document.querySelectorAll('.screenshot').forEach(el=>{
+  el.addEventListener('click',()=>{
+    const tag=el.querySelector('.screenshot-tag')?.textContent||'';
+    const lbl=el.querySelector('.screenshot-label')?.textContent||'Screenshot';
+    alert('📸 Substituir placeholder '+tag+'\n\n'+lbl);
+  });
+});
+</script>
+</body>
+</html>
