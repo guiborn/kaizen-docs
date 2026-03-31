@@ -9,3 +9,5 @@
   url: /tecnico/changelog/
 - title: Tutoriais
   url: /tutoriais/
+- title: API Docs
+  url: https://us-central1-kaizen-1ee16.cloudfunctions.net/api/docs/#/
