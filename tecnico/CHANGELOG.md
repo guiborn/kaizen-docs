@@ -12,6 +12,195 @@ Histórico de alterações e melhorias do sistema Kaizen.
 Este documento registra todas as versões e mudanças implementadas no sistema Kaizen, incluindo novos recursos, melhorias e correção de bugs.
 
 ---
+## Versão 3.7.10
+*09/04/2026*
+
+### 1. Painel de Notificações
+- **1.1.** Busca e filtro
+
+### 2. Medições Físicas
+- **2.1.** Correção de bugs
+- **2.2.** Novo gráfico na análise por grupo de serviços
+- **2.3.** Otimização do carregamento
+
+### 3. Quadro / Dashboard de Restrições
+- **3.1.** Correção de bugs
+- **3.2.** Responsável nos marcos
+- **3.3.** Editar marcos
+- **3.4.** Criar novas restrições a partir da dash
+
+### 4. Controle de Custos
+- **4.1.** Liberação do comparativo de versões para usuários normais
+
+### 5. Assistência Técnica
+- **5.1.** Novo privilégio de acesso para preenchimento da presença
+
+---
+
+## Versão 3.7.9
+*08/04/2026*
+
+### 1. Medição Física / Restrições
+- **1.1.** Correção de Bugs
+
+---
+
+## Versão 3.7.8
+*08/04/2026*
+
+### 1. Medição Física
+- **1.1.** Correção de Bugs
+
+### 2. Restrições
+- **2.1.** Correção de Bugs
+
+---
+
+## Versão 3.7.7
+*08/04/2026*
+
+### 1. Medições Físicas
+- **1.1.** Correção de bugs
+- **1.2.** Novas visões e colunas: Previsto Ponderado e Baseline Ponderado
+- **1.3.** Finalização e publicação da aba "Relatório"
+- **1.4.** Baseline Acumulada e Mensal no tooltip da medição (dentro da tela de análise de medição)
+- **1.5.** Nova aba KAI
+- **1.6.** Transformação em navigationRail
+
+---
+
+## Versão 3.7.6
+*07/04/2026*
+
+### 1. Medições Físicas
+- **1.1.** Melhorias no treinamento do modelo de análise
+- **1.2.** Melhorias no payload de dados para análise via IA
+- **1.3.** Correção de Bugs
+
+### 2. Inspeção Final
+- **2.1.** Correção de Bugs
+- **2.2.** Configurações - Requisitos (campos obrigatórios em NCs)
+- **2.3.** Contador de reinspeções
+
+---
+
+## Versão 3.7.5
+*06/04/2026*
+
+### 1. IA
+- **1.1.** Barramento oficial KAI
+- **1.2.** Clientes com barramento OpenWebUi poderão conectar seus próprios agentes
+
+### 2. Programação Semanal
+- **2.1.** Em desenvolvimento
+
+---
+
+## Versão 3.7.4
+*02/04/2026*
+
+### 1. Inspeção Final da Qualidade (IFQ)
+- **1.1.** Correção de Bugs
+
+### 2. Restrições
+- **2.1.** Correção de bugs (anexos)
+
+### 3. Notificações
+- **3.1.** Atalhos para notificações do farol de contratações
+
+---
+
+## Versão 3.7.3
+*02/04/2026*
+
+### 1. Inspeção Final da Qualidade (IFQ)
+- **1.1.** Correção de Bugs
+
+### 2. Restrições
+- **2.1.** Correção de bugs (anexos)
+
+---
+
+## Versão 3.7.2
+*01/04/2026*
+
+### 1. Inspeção Final da Qualidade (IFQ)
+- **1.1.** Correção de Bugs
+
+### 2. Análise Física / Curva S
+- **2.1.** Correção de Bugs
+- **2.2.** Alteração na lógica de disposição da baseline na curva S
+- **2.3.** Novos filtros
+
+### 3. Painel de Produção
+- **3.1.** Correção de bugs
+
+### 4. Cronograma / Tabela de Atividades
+- **4.1.** Novo campo "A executar no período"
+- **4.2.** Novo campo "Previsto Ponderado"
+
+### 5. Gantt
+- **5.1.** Correção de Bugs
+- **5.2.** Seletor de grupo de serviços
+- **5.3.** Filtro por fornecedor
+
+### 6. KAI
+- **6.1.** Melhorias no agente de análise de restrições (v6)
+
+---
+
+## Versão 3.7.1
+*30/03/2026*
+
+### 1. Inspeção Final da Qualidade (IFQ)
+- **1.1.** Correção de Bugs
+- **1.2.** Melhorias na UI e UX
+- **1.3.** Melhorias no relatório
+- **1.4.** Assinatura de Cliente
+- **1.5.** Integração Salesforce
+
+### 2. Dashboard Gerencial de Restrições
+- **2.1.** Correção de Bugs
+- **2.2.** Edição de restrições
+- **2.3.** Por padrão restrições concluídas não carrегam mais na primeira abertura da dashboard
+
+### 3. Assistência Técnica (AT)
+- **3.1.** Visualização para usuários read-only
+
+### 4. Farol de Contratações
+- **4.1.** Novo conceito de fluxo de contratação (etapas)
+- **4.2.** Nova visão Matriz de SLAs
+
+### 5. Login e Rotas
+- **5.1.** Correção de bugs e otimizações
+
+### 6. Cache de Usuários
+- **6.1.** Otimizações e ranking de interações para ordenamento
+
+---
+
+## Versão 3.7.0
+*26/03/2026*
+
+### 1. Inspeção Final da Qualidade (IFQ)
+- **1.1.** Correção de Bugs
+- **1.2.** Melhorias na UI e UX
+- **1.3.** Novas etapas no fluxo de inspeção:
+  - **in_progress** (Em inspeção) - Iniciada pela abertura da inspeção
+  - **completed** (Pendências em aberto) - Finalizar com NCs abertos (automático)
+  - **awaiting_reinspection** (Aguardando reinspeção) - Acionado pelo time de obra via tela de resumo
+  - **pending_reinspection** (Em reinspeção) - Inspetor via card "Iniciar Reinspeção"
+  - **closed** (Encerrada) - Inspetor finaliza (sem NCs ou após reinspeção)
+
+### 2. Medição Física
+- **2.1.** Warning para medições parciais não marcadas como prévia
+- **2.2.** Visão Baseline, Previsto e filtros na tabela de atividades
+- **2.3.** Vínculo de Restrições direto pela medição
+
+### 3. KAI
+- **3.1.** Sugestão de restrições pelos desvios apontados na medição física
+
+---
 ## Versão 3.6.9
 *26/03/2026*
 
