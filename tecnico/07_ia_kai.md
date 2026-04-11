@@ -13,15 +13,16 @@ toc: true
 1. [O que é o KAI](#1-o-que-é-o-kai)
 2. [Infraestrutura de IA](#2-infraestrutura-de-ia)
 3. [Agentes Disponíveis](#3-agentes-disponíveis)
-4. [KAI — Analista de Restrições](#4-kai--analista-de-restrições)
-5. [KAI — Analista de Planos de Ação](#5-kai--analista-de-planos-de-ação)
-6. [KAI — Relatório de Planejamento](#6-kai--relatório-de-planejamento)
-7. [KAI — Sugestão Inteligente de Restrições](#7-kai--sugestão-inteligente-de-restrições)
-8. [KAI — Identificação de Problemas](#8-kai--identificação-de-problemas)
-9. [KAI Chat](#9-kai-chat)
-10. [Base de Conhecimento (RAG)](#10-base-de-conhecimento-rag)
-11. [Arquitetura dos Agentes KAI](#11-arquitetura-dos-agentes-kai)
-12. [Segurança e Privacidade](#12-segurança-e-privacidade)
+4. [KAI 360 — Resumo Executivo](#4-kai-360--resumo-executivo)
+5. [KAI — Analista de Restrições](#5-kai--analista-de-restrições)
+6. [KAI — Analista de Planos de Ação](#6-kai--analista-de-planos-de-ação)
+7. [KAI — Relatório de Planejamento](#7-kai--relatório-de-planejamento)
+8. [KAI — Sugestão Inteligente de Restrições](#8-kai--sugestão-inteligente-de-restrições)
+9. [KAI — Identificação de Problemas](#9-kai--identificação-de-problemas)
+10. [KAI Chat](#10-kai-chat)
+11. [Base de Conhecimento (RAG)](#11-base-de-conhecimento-rag)
+12. [Arquitetura dos Agentes KAI](#12-arquitetura-dos-agentes-kai)
+13. [Segurança e Privacidade](#13-segurança-e-privacidade)
 
 ---
 
@@ -77,8 +78,7 @@ Qualquer aplicação que consuma APIs REST consegue se integrar ao KAI — mobil
 O KAI opera através de modelos de linguagem especializados, cada um com prompt de sistema dedicado ao seu domínio:
 
 | Agente / Modelo | Cloud Function | Domínio |
-|----------------|---------------|---------|
-| `kai-restriction-analyst` | `generateRestrictionReport` | Análise gerencial de restrições de obra |
+|----------------|---------------|---------|| `kai-360-executive` | `generateKai360Report` | Resumo executivo consolidado (multi-módulo) || `kai-restriction-analyst` | `generateRestrictionReport` | Análise gerencial de restrições de obra |
 | `kai-actionplan-analyst` | `generateActionPlanReport` | Análise de planos de ação e execução |
 | `kai-plan-analyst` | `generatePlanReport` | Análise do planejamento e cronograma |
 | `kai-suggestion` | `suggestRestrictions` | Sugestão automática de restrições a catalogar |
@@ -89,7 +89,131 @@ Todos os agentes compartilham a mesma camada de autenticação e seguem o mesmo 
 
 ---
 
-## 4. KAI — Analista de Restrições
+## 4. KAI 360 — Resumo Executivo
+
+### 4.1 Objetivo
+
+O **KAI 360** é um agente agregador que consolida insights de múltiplos módulos da obra (Restrições, Planejamento Físico, Planos de Ação) em um **relatório executivo holístico**. Diferente dos agentes especializados tradicionais, o KAI 360 oferece uma visão 360° integrada, permitindo que gestores e diretores entendam o contexto completo da obra em uma única análise.
+
+### 4.2 Modo de Operação
+
+O KAI 360 opera em **dois modos de análise**:
+
+#### Modo **Obra Única** (Single-Site)
+- Seleção de uma obra específica
+- Módulos selecionáveis (Restrições, Medições Físicas, Planos de Ação)
+- Análise profunda focada em uma obra
+- Relatório sem repetição de nome da obra em cada seção
+
+#### Modo **Multi-Obra**
+- Seleção de múltiplas obras da mesma filial
+- Ranking consolidado por saúde geral
+- Agrupamento de riscos críticos por obra
+- Síntese executiva com destaques por obra
+- Ideal para **Dashboard Gerencial de Restrições** e visualizações de portfólio
+
+### 4.3 Dados Analisados
+
+O agente coleta resumos executivos de cada módulo e sintetiza:
+
+**De Restrições:**
+- Status e categoria (6M) de cada restrição aberta
+- Impacto no caminho crítico
+- Vencimentos e reagendamentos
+- Responsáveis e setores sobrecarregados
+- KPIs: total aberto, vencidas, reagendadas 2+ vezes
+
+**De Medições Físicas:**
+- Progresso físico vs. planejado por atividade
+- Desvios críticos e alertas de atraso
+- Avançado/Atrasado por período
+- Curva S atual vs. baseline
+
+**De Planos de Ação:**
+- Execução de planos (% completo, milestones)
+- Planos vencidos e em risco
+- Impacto em caminho crítico
+- Extrapolações orçamentárias
+
+### 4.4 Estrutura do Relatório Gerado
+
+```markdown
+## 🎯 Sumário Executivo
+Frase única sintetizando saúde geral e principais riscos/oportunidades.
+
+## 🚦 Semáforo de Saúde
+Indicador visual (🟢 Verde / 🟡 Amarelo / 🔴 Vermelho) por obra (modo multi) ou obra única.
+
+## 📊 Ranking de Obras (modo multi-obra)
+Tabela com: Obra | Saúde | Restr. Críticas | Atraso Físico | Planos Vencidos
+
+## 🔴 Riscos Críticos Priorizados
+Até 5 riscos de maior impacto consolidados — causa, impacto potencial, obra afetada.
+
+## ✅ Decisões Necessárias Agora
+Ações imediatas para desbloquear progresso — o que precisa ser decidido nos próximos dias.
+
+## 🎬 Próximos Passos Operacionais
+Lista priorizada de atividades (máx. 5) para os próximos 7 dias.
+
+## 🏆 Destaques Positivos (Wins)
+Oportunidades, progressos notáveis ou áreas saudáveis a replicar.
+
+## 📋 Detalhamento por Módulo (opcional)
+Seções expandidas de Restrições, Medições e Planos se houver dados relevantes.
+```
+
+### 4.5 Saúde Geral (Health Status)
+
+O agente calcula um **semáforo consolidado** considerando:
+
+- **🔴 Vermelho:** Qualquer módulo com saúde crítica (restrições críticas vencidas, atraso > 15% no físico, planos críticos atrasados)
+- **🟡 Amarelo:** Alertas significativos mas controláveis (restrições amarelas, atraso 5-15%, planos vencidos em recuperação)
+- **🟢 Verde:** Todos os módulos dentro do esperado
+
+### 4.6 Freshness (Atualidade dos Dados)
+
+O relatório inclui informação de **quanto tempo os dados foram gerados**:
+
+- **Fresh (0 dias):** Report da ordem de geração
+- **Stale (1-3 dias):** Dados de alguns dias atrás, próximo refresh recomendado
+- **Outdated (>3 dias):** Report antigo, atualização fortemente recomendada
+- **Missing:** Módulo sem dados disponíveis
+
+### 4.7 Onde Aparece no App
+
+- **Drawer principal:** Botão "KAI 360" (gated por privilégio `kai_insights_view`)
+- **View dedicada:** `KAI360View` com setup interativo (seleção de obras/módulos) e relatório em tempo real
+- **Dashboard Gerencial:** Integração opcional em dashboard de restrições modo multi-obra
+- **Export:** Relatório markdown pode ser copiado para clipboard ou exportado
+
+### 4.8 Regras de Síntese
+
+1. **Sem duplicação:** Cada fato é mencionado uma única vez no relatório consolidado
+2. **Sem ficção:** Se não há dados suficientes em um módulo, o agente é honesto ("Sem restrições vencidas no momento")
+3. **Linguagem executiva:** Sem nomes de campos internos (`hasCriticalActivities`, `isOverdue`); apenas descrição natural
+4. **Priorização objetiva:** Risco = Severidade × Impacto × Urgência
+5. **Nomes das obras:** Aparecem apenas quando necessário para clareza (multi-obra) ou para deep links
+
+### 4.9 Deep Links e Navegação
+
+O relatório inclui **deep links contextuais** para:
+
+- "Ver Restrições Críticas" → abre Quadro de Restrições da obra
+- "Detalhe de Medições" → abre Controle de Produção com período relevante
+- "Acompanhar Planos" → abre módulo de Planos de Ação
+- "Chat KAI" → abre KAI Chat com contexto pré-carregado
+
+### 4.10 Performance e Cache
+
+- **Tempo de resposta:** 8-20s (coleta dados + LLM synthesis)
+- **Cache:** Reports são salvos em `{clientId}/kai360Reports/{docId}` com TTL de 24h
+- **Regeneração:** Botão explícito para forçar nova análise (limpa cache)
+- **Modo offline:** Se Firestore está indisponível, exibe "Desculpe, não consigo carregar os dados agora"
+
+---
+
+## 5. KAI — Analista de Restrições
 
 ### 4.1 Objetivo
 
@@ -172,7 +296,7 @@ Ordenadas por urgência + impacto no caminho crítico.
 
 ---
 
-## 5. KAI — Analista de Planos de Ação
+## 6. KAI — Analista de Planos de Ação
 
 ### 5.1 Objetivo
 
@@ -212,7 +336,7 @@ Gerar um **relatório de execução e acompanhamento de planos de ação**, com 
 
 ---
 
-## 6. KAI — Relatório de Planejamento
+## 7. KAI — Relatório de Planejamento
 
 ### 6.1 Objetivo
 
@@ -228,7 +352,7 @@ Análise do cronograma para reuniões de produção — destaca desvios de prazo
 
 ---
 
-## 7. KAI — Sugestão Inteligente de Restrições
+## 8. KAI — Sugestão Inteligente de Restrições
 
 ### 7.1 Objetivo
 
@@ -255,7 +379,7 @@ O agente retorna um array JSON que o app interpreta para pré-preencher o formul
 
 ---
 
-## 8. KAI — Identificação de Problemas
+## 9. KAI — Identificação de Problemas
 
 ### 8.1 Objetivo
 
@@ -269,7 +393,7 @@ Análise de anomalias na execução da obra: desvios de qualidade, não conformi
 
 ---
 
-## 9. KAI Chat
+## 10. KAI Chat
 
 ### 9.1 Objetivo
 
@@ -333,7 +457,7 @@ Se o barramento de IA retornar timeout ou indisponibilidade temporária, a Cloud
 
 ---
 
-## 10. Base de Conhecimento (RAG)
+## 11. Base de Conhecimento (RAG)
 
 O KAI também pode operar com base de conhecimento estruturada, usando recuperação de contexto relevante antes da geração da resposta. Esse mecanismo é aplicado quando a consulta depende de documentos, políticas ou conteúdos de referência além dos dados transacionais da obra.
 
@@ -351,7 +475,7 @@ O KAI também pode operar com base de conhecimento estruturada, usando recupera�
 
 ---
 
-## 11. Arquitetura dos Agentes KAI
+## 12. Arquitetura dos Agentes KAI
 
 ### 11.1 Fluxo de uma chamada KAI
 
@@ -407,7 +531,7 @@ No caso do **KAI Chat**, o fluxo inclui também histórico recente da conversa e
 
 ---
 
-## 12. Segurança e Privacidade
+## 13. Segurança e Privacidade
 
 ### 12.1 Autenticação obrigatória
 

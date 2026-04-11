@@ -1121,28 +1121,120 @@ Ferramentas de controle da qualidade de execução, cobrindo verificação em ca
 
 ### 5.1 Fichas de Verificação de Serviço (FVS)
 
-Dashboard central das FVS — checklists de qualidade associados a cada atividade executada. Opera em dois níveis:
+Dashboard integrado de checklists de qualidade por serviço e atividade executada. Arquitetura moderna baseada em **presets (modelos reutilizáveis)** e **instâncias (execuções individuais)** com suporte a conformidade e rastreamento de não-conformidades (NCs).
 
-| Nível | Descrição |
-|-------|-----------|
-| **Templates (`DefaultFVSModel`)** | Checklists padronizados por tipo de serviço, reutilizáveis entre obras; carregados com cache reativo |
-| **Instâncias (`FVSModel`)** | FVS preenchida para uma atividade específica, com resultado por item de checklist |
+#### 5.1.1 Arquitetura e Modelos de Dados
 
-**Fluxo de status:**
+| Camada | Modelo | Descrição |
+|--------|--------|-----------|
+| **Template** | `FVSPreset` | Checklist reutilizável por tipo de serviço; contém lista de itens base com campos obrigatórios para NCs e status requeridos |
+| **Inspección** | `FVSInstance` | Execução individual — resultado agregado com conformidade % (conforme + N/A / total); rastreia inspetor, executor, câmeras, localização (unidade ou lotes), datas de aprovação |
+| **Item** | `FVSItemModel` | Cada item avaliado com status (`conform / non_conform / not_applicable / not_inspected`), histórico de mudanças (`FVSStatusLog`), campos de NC vinculados, evidência e comentários |
+
+**Status lifecycle da FVS:**
 
 ```
-Em Verificação → Inspecionada → Aprovada
-                      ↓
-               Rejeitada → Pendência → (retrabalho) → Aprovada
+draft  →  in_progress  ─→  inspected  ─→  approved
+                                ↓
+                        (múltiplas reaberturas NCs)
 ```
 
-**Campos por instância:** atividade vinculada (serviço + lote denormalizados para leitura rápida), responsável, aprovador, prioridade, lista de itens com resultado (`conforme / não conforme / N/A`), contagem de itens rejeitados.
+| Status | Significado |
+|--------|------------|
+| `draft` | Criada, não iniciada |
+| `in_progress` | Execução ativa; itens sendo preenchidos |
+| `inspected` | Todos itens respondidos; aguardando aprovação |
+| `approved` | Aprovada; conformidade final atestada |
+| `closed` | Encerrada após aprovação final |
 
-**Filtros:** status, atividade, responsável, prioridade, lote, tag de serviço, busca por texto.
+#### 5.1.2 Fluxo de Uso
 
-**Contadores do dashboard:** Em Verificação · Pendências · Inspecionadas · Aprovadas · Total de Itens Rejeitados (rollup).
+**Fase 1 — Configuração (`FvsConfigView` + `FvsConfigController`):**
 
-**Exportação:** PDF com fotos, assinaturas e observações.
+1. Seleciona **tipo de localização**: unidade (asset) ou lotes
+2. Seleciona **serviço** (popup com autocomplete por `SiteSelectorController.lstServices`)
+3. Seleciona **modelo de FVS** (carregado por `FvsPresetRepository.listPresetsForService()`)
+4. Insira **responsável by inspeção** (inspetor)
+5. Opcionalmente, seleciona **plantas/croquis** vinculados (carregado de Hive: `croquis_{siteId}`)
+6. Confirma e inicia
+
+**Fase 2 — Execução (`FvsExecuteView` + `FvsExecuteController`):**
+
+1. App apresenta cada item do modelo com:
+   - Descrição e método de medição (métodos padrão por tipo de serviço)
+   - Limite de aprovação (validação automática: se valor < limite → N/A automático)
+   - **Botões de status:** Conforme / Não Conforme / Não Aplicável
+   - **Campo de NC** (popup): se não-conforme, abre dialog com campos obrigatórios (descrição, empresa responsável, prazo de resolução, foto evidência)
+   - Histórico inline de mudanças de status (com timestamp, usuário, antes→depois)
+
+2. Controller calcula em tempo real:
+   - `totalItems`, `conformCount`, `nonConformCount`, `naCount`, `openIssues`  
+   - `conformancePercent = (conform + na) / total`
+   - Badge de "X Pendências abertas" atualizado
+
+3. Persiste incrementalmente via `FvsRepository.saveItem()` (2 args: `siteId`, `FVSItemModel`)
+
+**Fase 3 — Dashboard (`FvsDashboardView` + `FvsDashboardController`):**
+
+- **Lista de FVS** filtrada por:
+  - Status (`in_progress`, `inspected`, `approved`, `hasPendencies`)
+  - Serviço, lote, responsável, data de início/término
+  - Conformidade: `>95%` (verde), `85-95%` (azul), `70-85%` (amarelo), `<70%` (vermelho)
+
+- **Contadores globais:** Total · Com pendências · Em verificação · Inspecionadas · Aprovadas
+
+- **Abas:**
+  1. **FVS Ativas** — tabela interativa de instâncias
+  2. **Pendências** — lista detalhada de itens não-conformes com drill-down por NC
+  3. **Análise** — gráficos de conformidade por serviço, timeline de resolução de NCs, SLA de aprovação
+
+- **Ações por FVS:**
+  - Abrir para edição / revalidação
+  - Aprovar (fecha e bloqueia)
+  - Exportar PDF (com fotos, signatures, status history)
+  - Vincular/desvincular restrição (link bidirecional ao módulo de Rotinas)
+
+#### 5.1.3 Integração com Inspeção e NCs
+
+- **Sincronização de status com `InspectionItemStatus`:** FVS item status mapeia para enum do módulo IFQ:
+  - `conform` ↔ `InspectionItemStatus.conform`
+  - `non_conform` ↔ `InspectionItemStatus.non_conform`
+  - `not_applicable` ↔ `InspectionItemStatus.not_applicable`
+
+- **NCs rastreáveis:** cada não-conformidade registra:
+  - Item vinculado + FVS vinculada
+  - Campo de causa, empresa responsável, prazo, evidência fotográfica
+  - Status de resolução (aberta / pendente / resolvida) com histórico de reinspção
+
+#### 5.1.4 Persistência e Sincronização
+
+**Path Firestore:**
+
+```
+{client}/default_sites/{siteId}/
+  fvs_presets/            # Templates reutilizáveis
+    {presetId}/
+      items/              # Items do template
+  fvs_inspections/        # Instâncias executadas
+    {fvsInstanceId}/
+      items/              # Items preenchidos
+      issues/             # NCs registradas (subcollection)
+```
+
+**Estratégia de sync offline:**
+- Hive cache: presets + instâncias recentes
+- SyncQueueService: enfileira saveItem/updateStatus em background
+- Conflito: last-write-wins com timestamp do servidor
+
+#### 5.1.5 Privilégios e Acesso
+
+| Privilégio | Permissão |
+|-----------|-----------|
+| `fvs_fill` | Criar e preencher FVS |
+| `fvs_approval` | Aprovar e rejeitar FVS |
+| `quality_manager` | Acesso total: criar, editar, aprovar, exportar, vincular restrições |
+
+**Filtragem por filial:** dados sempre filtrados por `branch` ativa (via `BranchAccessService`); usuários normais veem apenas de sua filial.
 
 **Chave de privilégio:** `fvs_fill` / `fvs_approval` / `quality_manager`
 
