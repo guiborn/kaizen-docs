@@ -153,6 +153,69 @@ body {
   }
 }
 
+// Submenu styles
+.nav-submenu {
+  list-style: none;
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  margin: 8px 0 0 0;
+  padding: 8px 0 0 0;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: $theme-purple-dark;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  z-index: 100;
+
+  @media (max-width: 768px) {
+    position: static;
+    background-color: transparent;
+    box-shadow: none;
+    margin-left: 12px;
+    padding-left: 12px;
+    border-left: 2px solid rgba(255, 255, 255, 0.24);
+  }
+}
+
+.nav-item:hover .nav-submenu {
+  display: flex;
+
+  @media (max-width: 768px) {
+    display: flex;
+  }
+}
+
+.nav-subitem {
+  list-style: none;
+}
+
+.nav-sublink {
+  color: #f8fafc;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 14px;
+  display: block;
+  transition: all 0.3s ease;
+
+  &:hover,
+  &:focus-visible {
+    background-color: rgba(255, 255, 255, 0.16);
+    text-decoration: none;
+    color: white;
+  }
+
+  &.active {
+    background-color: rgba(255, 255, 255, 0.24);
+    font-weight: 600;
+    color: white;
+  }
+}
+
 // Post styles
 .post {
   margin-bottom: 48px;
