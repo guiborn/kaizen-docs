@@ -109,7 +109,7 @@ Baseline (Prevision)  →  expectedAtDate(refDate)  →  expected por atividade
 Cronograma Atual      →  globalDone por atividade  →  measured por atividade
                                   ↓
            PPC = Σ(realizado) / Σ(esperado)   (Percent Plan Complete)
-           PPCC = PPC acumulado histórico
+           PPCC = PPC do caminho crítico (somente atividades críticas)
            flagColor: 🔴 < 95% da meta | 🟡 próximo | 🟢 dentro da meta
 ```
 
@@ -128,7 +128,7 @@ Cronograma Atual      →  globalDone por atividade  →  measured por atividade
 | `generalComments` | Observações gerais da medição (visíveis no cabeçalho da análise) |
 | `generalCommentsLastEditedBy/At` | Auditoria da última edição das obs. gerais |
 | `ppc` | PPC calculado: `Σrealizado / Σesperado` |
-| `ppcc` | PPC acumulado (soma histórica) |
+| `ppcc` | PPC do caminho crítico — mesmo cálculo de PPC mas restrito às atividades em `criticalActivities` |
 | `expectedPercentage` / `donePercentage` | % global acumulado previsto e realizado |
 | `mExpectedPercentage` / `mDonePercentage` | % do período (delta desde a medição anterior) |
 | `isPreview` | Indica que é uma medição de prévia (não afeta histórico principal) |
