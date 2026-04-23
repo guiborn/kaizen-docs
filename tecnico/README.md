@@ -44,6 +44,7 @@ O sistema é **multi-tenant** (múltiplos clientes isolados na mesma infraestrut
 | [06 — Perfis e Controle de Acesso](./06_perfis_acesso.md) | Roles, privilege keys, controle por filial |
 | [07 — Inteligência Artificial (KAI)](./07_ia_kai.md) | Agentes KAI, RAG, análise de restrições e planos de ação |
 | [08 — Cloud Functions e Kaizen API](./08_cloud_functions_api.md) | Funções backend, triggers, notificações, API REST para Data Lake |
+| [09 — Kaizen MCP Server](./09_kaizen_mcp.md) | MCP server para integração com Claude, Copilot e assistentes de IA |
 
 ---
 
