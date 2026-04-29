@@ -20,6 +20,24 @@
         >
           {{ item.title }}
         </a>
+        {% if item.submenu %}
+          <ul class="nav-submenu">
+            {% for subitem in item.submenu %}
+              {% assign is_subactive = false %}
+              {% if page.url == subitem.url %}
+                {% assign is_subactive = true %}
+              {% endif %}
+              <li class="nav-subitem">
+                <a 
+                  href="{{ subitem.url | relative_url }}" 
+                  class="nav-sublink {% if is_subactive %}active{% endif %}"
+                >
+                  {{ subitem.title }}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
       </li>
     {% endfor %}
   </ul>

@@ -5,6 +5,9 @@
   url: /
 - title: Técnico
   url: /tecnico/
+  submenu:
+    - title: Kaizen MCP
+      url: /tecnico/mcp/
 - title: Changelog
   url: /tecnico/changelog/
 - title: Tutoriais
