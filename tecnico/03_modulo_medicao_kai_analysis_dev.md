@@ -1,9 +1,9 @@
 ---
 layout: page
-title: "Medição e Análise KAI"
-permalink: /tecnico/medicao/
+title: "Medição e Análise KAI — Documentação Técnica"
+permalink: /tecnico/medicao-dev/
 category: "Módulos"
-order: 3
+order: 3.1
 toc: true
 ---
 
